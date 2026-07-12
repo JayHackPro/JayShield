@@ -1,0 +1,53 @@
+{
+  "name": "@jayhackpro/jayshield",
+  "version": "1.0.0",
+  "description": "Find and remove web malware, webshells, and backdoors. A fast, dependency-free malware scanner and quarantine tool by JayHackPro.",
+  "keywords": [
+    "malware",
+    "malware-scanner",
+    "antivirus",
+    "webshell",
+    "backdoor",
+    "security",
+    "infosec",
+    "incident-response",
+    "php-security",
+    "wordpress-security",
+    "web-security",
+    "quarantine",
+    "cli"
+  ],
+  "homepage": "https://github.com/JayHackPro/JayShield#readme",
+  "bugs": {
+    "url": "https://github.com/JayHackPro/JayShield/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JayHackPro/JayShield.git"
+  },
+  "license": "MIT",
+  "author": "Jayden Yoon ZK (JayHackPro Inc.)",
+  "type": "module",
+  "bin": {
+    "jayshield": "bin/jayshield.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "start": "node bin/jayshield.js",
+    "selftest": "node bin/jayshield.js --selftest"
+  },
+  "dependencies": {}
+}
