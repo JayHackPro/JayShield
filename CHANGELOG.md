@@ -3,6 +3,13 @@
 All notable changes to JayShield are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.2.1 - 2026-07-13
+
+### Changed
+
+- The product now carries its registered mark, JayShield®, in the banner
+  subtitle and the scan header, matching how the brand appears everywhere else.
+
 ## 1.2.0 - 2026-07-13
 
 ### Added

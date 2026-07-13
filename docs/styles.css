@@ -221,6 +221,21 @@ h1 {
 .t-path { color: var(--ink); font-weight: 700; }
 .t-desc { color: var(--ink-soft); }
 .t-ok { color: var(--green); font-weight: 700; }
+/* The JayHackPro startup banner inside the demo terminal. The block art shows
+   on wider terminals; narrow ones fall back to the compact mark, exactly like
+   the real CLI. */
+.t-banner { display: block; }
+.t-ascii {
+  display: block; white-space: pre; color: var(--green-bright);
+  font-size: 9px; line-height: 1.08; letter-spacing: 0;
+  text-shadow: 0 0 8px rgba(70, 240, 138, 0.35); overflow: hidden;
+}
+.t-compact { display: none; color: var(--green-bright); font-weight: 700; text-shadow: 0 0 10px rgba(70, 240, 138, 0.4); }
+.t-sub { color: var(--green-bright); font-weight: 700; }
+@media (max-width: 620px) {
+  .t-ascii { display: none; }
+  .t-compact { display: block; }
+}
 .sv-crit { color: var(--crit); font-weight: 700; }
 .sv-high { color: var(--high); font-weight: 700; }
 .sv-med { color: var(--med); font-weight: 700; }

@@ -173,12 +173,22 @@
   const replay = document.querySelector(".term-replay");
   if (term) {
     const CMD = "npx @jayhackpro/jayshield ./public_html";
+    // The JayHackPro startup banner, exactly as the CLI prints it.
+    const ASCII = [
+      "     ██╗ █████╗ ██╗   ██╗██╗  ██╗ █████╗  ██████╗██╗  ██╗██████╗ ██████╗  ██████╗",
+      "     ██║██╔══██╗╚██╗ ██╔╝██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔══██╗██╔═══██╗",
+      "     ██║███████║ ╚████╔╝ ███████║███████║██║     █████╔╝ ██████╔╝██████╔╝██║   ██║",
+      "██   ██║██╔══██║  ╚██╔╝  ██╔══██║██╔══██║██║     ██╔═██╗ ██╔═══╝ ██╔══██╗██║   ██║",
+      "╚█████╔╝██║  ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗██║     ██║  ██║╚██████╔╝",
+      " ╚════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝"
+    ].join("\n");
     const lines = [
       { d: 350, html: "" },
-      { d: 120, html: '<span class="t-head">  ▓▓ JayShield</span><span class="t-dim">  malware scanner by JayHackPro</span>' },
-      { d: 120, html: "" },
-      { d: 520, html: '<span class="t-dim">  Scanning 1,284 files...</span>' },
-      { d: 360, html: '<span class="t-dim">  Scanned 1,284 files (24.6 MB) in 0.9s</span>' },
+      { d: 260, html: '<span class="t-banner"><span class="t-ascii">' + ASCII + '</span><span class="t-compact">  ▓█ JayHackPro █▓</span></span>' },
+      { d: 140, html: '<span class="t-sub">  JayShield®  ·  find and remove web malware</span><span class="t-dim">   v1.2.1</span>' },
+      { d: 100, html: '<span class="t-dim">  github.com/JayHackPro/JayShield</span>' },
+      { d: 200, html: "" },
+      { d: 420, html: '<span class="t-dim">  Scanned 1,284 files (24.6 MB) in 0.9s</span>' },
       { d: 140, html: "" },
       { d: 340, html: '<span class="sv-crit">  CRITICAL </span><span class="t-path">public_html/wp-content/uploads/logo.php</span>' },
       { d: 90, html: '     <span class="sv-crit">✕</span> Obfuscated eval of a decoded payload<span class="t-dim">:1</span>' },

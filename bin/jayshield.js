@@ -30,7 +30,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 /** The JayHackPro brand banner, with the JayShield subtitle. */
 function brandBanner(v) {
   return renderBanner({
-    subtitle: "JayShield  ·  find and remove web malware",
+    subtitle: "JayShield®  ·  find and remove web malware",
     version: v,
     url: "github.com/JayHackPro/JayShield"
   });

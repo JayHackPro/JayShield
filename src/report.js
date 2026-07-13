@@ -29,7 +29,7 @@ function seconds(ms) {
 
 /** The JayShield header line, brand green on the terminal. */
 export function banner() {
-  const mark = color.brand(color.bold("JayShield"));
+  const mark = color.brand(color.bold("JayShield®"));
   return `${color.brand("▓▓")} ${mark} ${color.dim("malware scanner by JayHackPro")}`;
 }
 
