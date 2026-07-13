@@ -8,6 +8,7 @@ A fast, dependency free malware scanner and remover for websites and servers.
 Point it at a folder, see exactly what is infected, then quarantine the threats
 safely. Nothing is ever deleted without your say so.
 
+[![npm](https://img.shields.io/npm/v/@jayhackpro/jayshield?color=brightgreen)](https://www.npmjs.com/package/@jayhackpro/jayshield)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
@@ -38,27 +39,26 @@ it anywhere Node is installed.
 
 ## Quick start
 
-Run it straight from GitHub, no install and no dependencies to download:
+No install required, run it straight from npm:
 
 ```bash
-npx github:JayHackPro/JayShield ./public_html
+npx @jayhackpro/jayshield ./public_html
 ```
 
 Prove it works on your machine first, using the harmless industry standard test file:
 
 ```bash
-npx github:JayHackPro/JayShield --selftest
+npx @jayhackpro/jayshield --selftest
 ```
 
-Prefer a local copy? Clone it and run it directly:
+Or install it once and call it by name:
 
 ```bash
-git clone https://github.com/JayHackPro/JayShield.git
-node JayShield/bin/jayshield.js ./public_html
+npm install -g @jayhackpro/jayshield
+jayshield ./public_html
 ```
 
-The examples below write `jayshield` for short. That means whichever way you run
-it: the `npx` command above, or `node bin/jayshield.js` from a clone.
+The examples below write `jayshield` for short, meaning however you choose to run it.
 
 ## What it catches
 
@@ -178,10 +178,10 @@ jayshield ./public_html --json > jayshield-report.json
 
 ## Use it from code
 
-Install it from GitHub, then import the pieces you need:
+Install it, then import the pieces you need:
 
 ```bash
-npm install github:JayHackPro/JayShield
+npm install @jayhackpro/jayshield
 ```
 
 ```js
