@@ -36,6 +36,98 @@
   const canvas = document.querySelector(".rain");
   if (canvas && !reduced) startRain(canvas);
 
+  // ----- Cursor trail: the pointer drips binary code (0s and 1s).
+  if (matchMedia("(pointer: fine)").matches && !reduced) startCursorTrail();
+
+  function startCursorTrail() {
+    const cv = document.createElement("canvas");
+    cv.className = "cursor-trail";
+    cv.setAttribute("aria-hidden", "true");
+    document.body.appendChild(cv);
+    const ctx = cv.getContext("2d");
+
+    let w, h, dpr;
+    function size() {
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      w = innerWidth;
+      h = innerHeight;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    size();
+    addEventListener("resize", size);
+
+    const bits = [];
+    const CAP = 90;
+    let last = null;
+    let raf = 0;
+    let prev = 0;
+
+    function spawn(x, y, dx, dy) {
+      if (bits.length >= CAP) return;
+      bits.push({
+        x: x + (Math.random() - 0.5) * 5,
+        y: y + (Math.random() - 0.5) * 5,
+        vx: dx * 0.14 + (Math.random() - 0.5) * 12,
+        vy: dy * 0.12 + 6 + Math.random() * 16,
+        ch: Math.random() < 0.5 ? "0" : "1",
+        size: 12 + Math.random() * 6,
+        ttl: 480 + Math.random() * 340,
+        age: 0,
+        bright: Math.random() < 0.24
+      });
+    }
+
+    addEventListener("pointermove", (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      if (last) {
+        const dx = x - last.x;
+        const dy = y - last.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 6) return;
+        const steps = Math.min(3, Math.round(d / 10));
+        for (let i = 1; i <= steps; i++) spawn(last.x + (dx * i) / steps, last.y + (dy * i) / steps, dx, dy);
+      } else {
+        spawn(x, y, 0, 0);
+      }
+      last = { x: x, y: y };
+      if (!raf) { prev = performance.now(); raf = requestAnimationFrame(tick); }
+    }, { passive: true });
+
+    function tick(t) {
+      const dt = Math.min(50, t - prev);
+      prev = t;
+      ctx.clearRect(0, 0, w, h);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (let i = bits.length - 1; i >= 0; i--) {
+        const b = bits[i];
+        b.age += dt;
+        if (b.age >= b.ttl) { bits.splice(i, 1); continue; }
+        const k = b.age / b.ttl;
+        b.x += (b.vx * dt) / 1000;
+        b.y += (b.vy * dt) / 1000;
+        b.vy += (26 * dt) / 1000;
+        ctx.globalAlpha = (1 - k) * (b.bright ? 1 : 0.78);
+        ctx.font = "700 " + b.size.toFixed(1) + "px ui-monospace, 'SF Mono', Menlo, monospace";
+        ctx.shadowColor = "rgba(70, 240, 138, 0.7)";
+        ctx.shadowBlur = b.bright ? 12 : 6;
+        ctx.fillStyle = b.bright ? "#c9ffdd" : "#46f08a";
+        ctx.fillText(b.ch, b.x, b.y);
+      }
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      if (bits.length) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = 0;
+        ctx.clearRect(0, 0, w, h);
+      }
+    }
+  }
+
   function startRain(cv) {
     const ctx = cv.getContext("2d");
     const glyphs = "01</>{}[];=$#*+.ｱｶｷｹｼﾂﾃﾅﾆﾇﾊﾎﾏﾐﾑﾒﾓABCDEF0123456789".split("");
