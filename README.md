@@ -158,6 +158,8 @@ jayshield [paths...] [options]
 | `--dry-run` | Show actions without changing anything |
 | `--json` | Machine readable output for pipelines |
 | `--no-color` | Plain text |
+| `--no-banner` | Hide the startup banner |
+| `--banner` | Print the JayHackPro banner and exit |
 | `-v, --verbose` | Include rule ids and references |
 | `--selftest` | Detect the EICAR test file end to end |
 | `-V, --version` | Print the version |

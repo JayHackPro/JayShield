@@ -1,6 +1,6 @@
 {
   "name": "@jayhackpro/jayshield",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Find and remove web malware, webshells, and backdoors. A fast, dependency-free malware scanner and quarantine tool by JayHackPro.",
   "keywords": [
     "malware",

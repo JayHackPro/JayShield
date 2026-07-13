@@ -3,6 +3,16 @@
 All notable changes to JayShield are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.2.0 - 2026-07-13
+
+### Added
+
+- A JayHackPro startup banner. A scan, `--help`, `--selftest`, and the new
+  `--banner` now print the JayHackPro block wordmark in green with the JayShield
+  subtitle. It is the shared brand mark for JayHackPro tools. Narrow terminals
+  get a compact version so it never wraps, and `--no-banner` (or `--json`) turns
+  it off for clean and automated output.
+
 ## 1.1.0 - 2026-07-13
 
 A precision and coverage pass, verified against real code.

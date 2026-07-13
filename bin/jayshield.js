@@ -20,11 +20,21 @@ import {
   QUARANTINE_DIR
 } from "../src/quarantine.js";
 import { formatHuman, toJson, summaryLine } from "../src/report.js";
+import { renderBanner } from "../src/banner.js";
 import { selfTest } from "../src/selftest.js";
 import { color, setColor, severityColor } from "../src/colors.js";
 
 const SEVERITIES = ["critical", "high", "medium", "low"];
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+/** The JayHackPro brand banner, with the JayShield subtitle. */
+function brandBanner(v) {
+  return renderBanner({
+    subtitle: "JayShield  ·  find and remove web malware",
+    version: v,
+    url: "github.com/JayHackPro/JayShield"
+  });
+}
 
 async function version() {
   try {
@@ -38,7 +48,7 @@ async function version() {
 const BOOLEAN_FLAGS = new Set([
   "quarantine", "restore", "list", "purge", "selftest",
   "json", "follow-symlinks", "no-color", "verbose", "dry-run",
-  "yes", "help", "version"
+  "yes", "help", "version", "banner", "no-banner"
 ]);
 const VALUE_FLAGS = new Set(["min-severity", "ignore-rule", "hashes", "max-size", "vault"]);
 const ALIASES = { h: "help", V: "version", v: "verbose", q: "quarantine", j: "json" };
@@ -86,10 +96,7 @@ function parseArgs(argv) {
 }
 
 function helpText(v) {
-  const b = (s) => color.brand(color.bold(s));
   return `
-  ${b("JayShield")} ${color.dim("v" + v)}  ${color.dim("malware scanner and remover by JayHackPro")}
-
   ${color.bold("Find and remove web malware, webshells, and backdoors.")}
 
   ${color.bold("Usage")}
@@ -124,6 +131,8 @@ function helpText(v) {
     --dry-run                show actions without changing anything
     --json                   output JSON
     --no-color               plain text
+    --no-banner              hide the startup banner
+    --banner                 print the banner and exit
     -v, --verbose            more detail
     -V, --version            print version
     -h, --help               this help
@@ -146,14 +155,15 @@ async function main() {
   if (flags["no-color"] || flags.json) setColor(false);
 
   const v = await version();
-  if (flags.help) { process.stdout.write(helpText(v) + "\n"); return; }
+  if (flags.banner) { process.stdout.write(brandBanner(v) + "\n"); return; }
+  if (flags.help) { process.stdout.write(brandBanner(v) + helpText(v) + "\n"); return; }
   if (flags.version) { process.stdout.write(v + "\n"); return; }
   if (bad) { fail(bad); return; }
 
   const vaultDir = flags.vault || QUARANTINE_DIR;
 
   // ----- Vault management modes
-  if (flags.selftest) return runSelfTest(flags);
+  if (flags.selftest) return runSelfTest(flags, v);
   if (flags.list) return runList(vaultDir, flags);
   if (flags.restore) return runRestore(vaultDir, positionals, flags);
   if (flags.purge) return runPurge(vaultDir, positionals, flags);
@@ -196,12 +206,15 @@ async function main() {
     followSymlinks: Boolean(flags["follow-symlinks"])
   });
 
+  const showBanner = !flags.json && !flags["no-banner"];
+
   let quarantined = false;
   if (flags.quarantine && result.infected.length) {
     const q = await quarantineFiles(result.infected, { vaultDir, dryRun: Boolean(flags["dry-run"]) });
     quarantined = !flags["dry-run"];
     if (flags["dry-run"] && !flags.json) {
-      process.stdout.write(formatHuman(result, { verbose: flags.verbose }));
+      if (showBanner) process.stdout.write(brandBanner(v));
+      process.stdout.write(formatHuman(result, { verbose: flags.verbose, header: !showBanner }));
       process.stdout.write("\n  " + color.yellow(color.bold("Dry run")) + color.dim(` would quarantine ${q.moved.length} file(s). Nothing was changed.`) + "\n\n");
       process.exitCode = 1;
       return;
@@ -214,21 +227,23 @@ async function main() {
   if (flags.json) {
     process.stdout.write(toJson(result, { version: v }) + "\n");
   } else {
-    process.stdout.write(formatHuman(result, { verbose: flags.verbose, quarantined }));
+    if (showBanner) process.stdout.write(brandBanner(v));
+    process.stdout.write(formatHuman(result, { verbose: flags.verbose, quarantined, header: !showBanner }));
     process.stderr.write(color.dim("  " + summaryLine(result)) + "\n");
   }
 
   process.exitCode = result.infected.length ? 1 : 0;
 }
 
-async function runSelfTest(flags) {
+async function runSelfTest(flags, v) {
   const res = await selfTest();
   if (flags.json) {
     process.stdout.write(JSON.stringify(res, null, 2) + "\n");
     process.exitCode = res.passed ? 0 : 1;
     return;
   }
-  process.stdout.write("\n  " + color.brand(color.bold("JayShield self-test")) + "\n\n");
+  if (!flags["no-banner"]) process.stdout.write(brandBanner(v));
+  process.stdout.write("  " + color.brand(color.bold("self-test")) + "\n\n");
   for (const c of res.checks) {
     const mark = c.ok ? color.green("✔") : color.red("✕");
     process.stdout.write(`  ${mark} ${c.name}\n     ${color.dim(c.detail)}\n`);

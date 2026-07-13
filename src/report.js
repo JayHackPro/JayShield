@@ -52,8 +52,10 @@ export function summaryLine(result) {
 export function formatHuman(result, opts = {}) {
   const out = [];
   out.push("");
-  out.push("  " + banner());
-  out.push("");
+  if (opts.header !== false) {
+    out.push("  " + banner());
+    out.push("");
+  }
   out.push(
     "  " +
       color.dim(
