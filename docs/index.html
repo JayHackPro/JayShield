@@ -20,8 +20,8 @@
   <meta name="twitter:title" content="JayShield by JayHackPro">
   <meta name="twitter:description" content="Find and remove web malware, webshells, and backdoors. Fast, dependency-free, open source.">
   <meta name="twitter:image" content="https://jayhackpro.github.io/JayShield/assets/social-preview.png">
-  <link rel="stylesheet" href="styles.css?v=6">
-  <script src="app.js?v=6" defer></script>
+  <link rel="stylesheet" href="styles.css?v=9">
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -63,14 +63,14 @@
       <div class="cta-row">
         <button class="copy-cmd" data-cmd="npx @jayhackpro/jayshield ./public_html" aria-label="Copy install command">
           <span class="copy-prompt">$</span>
-          <code>npx @jayhackpro/jayshield ./public_html</code>
+          <code>npx <span class="nb">@jayhackpro/jayshield</span> <span class="nb">./public_html</span></code>
           <span class="copy-icon" aria-hidden="true">⧉</span>
         </button>
         <a class="btn-ghost" href="https://github.com/JayHackPro/JayShield">View source →</a>
       </div>
       <ul class="hero-facts">
         <li><b>0</b> dependencies</li>
-        <li><b>51</b> tests</li>
+        <li><b>54</b> tests</li>
         <li><b>MIT</b> licensed</li>
         <li><b>Node 18+</b></li>
       </ul>
@@ -103,35 +103,47 @@
     <div class="wrap">
       <p class="kicker">// detections</p>
       <h2>Built to catch how sites really get hacked.</h2>
-      <p class="section-lede">One rule catches a whole technique, not a single strain, so JayShield finds the copies too. Signatures, hashes, and shape based heuristics, layered together.</p>
+      <p class="section-lede">One rule catches a whole technique, not a single strain, so JayShield finds the copies too. Signatures, hashes, and shape-based heuristics, layered together.</p>
       <div class="cards">
         <article class="card">
-          <div class="card-ico" aria-hidden="true">&#128126;</div>
+          <div class="card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M3 8.5h18"/><path d="M6.8 12.4l2.3 2-2.3 2"/><path d="M12.4 16.4h4.6"/></svg>
+          </div>
           <h3>Webshells</h3>
           <p>c99, r57, WSO, b374k, FilesMan, and the generic remote file managers and command runners built on the same patterns.</p>
         </article>
         <article class="card">
-          <div class="card-ico" aria-hidden="true">&#128682;</div>
+          <div class="card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 20.5V4.9a1 1 0 0 1 1.2-1l8 1.5a1 1 0 0 1 .8 1V20.5"/><path d="M4.5 20.5h15"/><path d="M13.6 11.8v2"/></svg>
+          </div>
           <h3>Backdoors</h3>
           <p>eval of request input, variable functions driven by the query string, the preg_replace trick, remote payloads that fetch and run, and reverse shells.</p>
         </article>
         <article class="card">
-          <div class="card-ico" aria-hidden="true">&#129520;</div>
+          <div class="card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 4.5c-1.7 0-2.3 1-2.3 2.7v1.3c0 1.2-.5 2-1.6 2.2 1.1.2 1.6 1 1.6 2.2v1.3c0 1.7.6 2.7 2.3 2.7"/><path d="M15.4 4.5c1.7 0 2.3 1 2.3 2.7v1.3c0 1.2.5 2 1.6 2.2-1.1.2-1.6 1-1.6 2.2v1.3c0 1.7-.6 2.7-2.3 2.7"/><path d="M10.6 11.5h2.8"/></svg>
+          </div>
           <h3>Obfuscation</h3>
-          <p>Decode then run payloads, character and hex tricks, packed one liners, and the big encoded blobs that hide a shell in plain sight.</p>
+          <p>Decode then run payloads, character and hex tricks, packed one-liners, and the big encoded blobs that hide a shell in plain sight.</p>
         </article>
         <article class="card">
-          <div class="card-ico" aria-hidden="true">&#128247;</div>
+          <div class="card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.4" cy="9.8" r="1.5"/><path d="M4.4 17.2l4.2-3.8 2.7 2.4 3.6-3.3 4.6 4.2"/></svg>
+          </div>
           <h3>Image polyglots</h3>
-          <p>The classic upload bypass: a real image with PHP appended to the end. Byte level checks catch it even though the file looks binary.</p>
+          <p>The classic upload bypass: a real image with PHP appended to the end. Byte-level checks catch it even though the file looks binary.</p>
         </article>
         <article class="card">
-          <div class="card-ico" aria-hidden="true">&#9935;</div>
+          <div class="card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.6"/><rect x="10" y="10" width="4" height="4" rx="0.5"/><path d="M9.7 4v3M14.3 4v3M9.7 17v3M14.3 17v3M4 9.7h3M4 14.3h3M17 9.7h3M17 14.3h3"/></svg>
+          </div>
           <h3>Miners and skimmers</h3>
-          <p>In browser cryptocurrency miners, hidden iframes, and the scripts that quietly copy a visitor session off to another server.</p>
+          <p>In-browser cryptocurrency miners, hidden iframes, and the scripts that quietly copy a visitor session off to another server.</p>
         </article>
         <article class="card">
-          <div class="card-ico" aria-hidden="true">&#128273;</div>
+          <div class="card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3.5H7.5A1.5 1.5 0 0 0 6 5v14a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V8.5z"/><path d="M13 3.5V8.5h5"/><path d="M9.7 13.2h4.6M9.3 16.2h4.6M12 11.6l-.7 6.2M14 11.6l-.7 6.2"/></svg>
+          </div>
           <h3>Known bad files</h3>
           <p>Exact hash matches against a set you can extend, plus the EICAR test file so you can prove the scanner is wired up correctly.</p>
         </article>
@@ -146,7 +158,7 @@
         <h2>Remove threats without losing a byte.</h2>
         <p class="section-lede">JayShield never deletes your files. Quarantine moves each flagged file into a local vault and records where it came from, so your live site stops serving it at once while every byte is kept.</p>
         <ul class="how-list">
-          <li><span class="how-num">01</span> <div><b>Scan</b> read only by default. Nothing on disk changes until you say so.</div></li>
+          <li><span class="how-num">01</span> <div><b>Scan</b> read-only by default. Nothing on disk changes until you say so.</div></li>
           <li><span class="how-num">02</span> <div><b>Quarantine</b> flagged files move into a sealed local vault, out of the web root.</div></li>
           <li><span class="how-num">03</span> <div><b>Restore</b> put anything back, byte for byte, if a detection was wrong.</div></li>
         </ul>
@@ -173,18 +185,18 @@
       <div class="install-cards">
         <div class="install-card">
           <p class="install-label">Scan a folder, no install</p>
-          <button class="copy-cmd wide" data-cmd="npx @jayhackpro/jayshield ./public_html"><span class="copy-prompt">$</span><code>npx @jayhackpro/jayshield ./public_html</code><span class="copy-icon" aria-hidden="true">⧉</span></button>
+          <button class="copy-cmd wide" data-cmd="npx @jayhackpro/jayshield ./public_html"><span class="copy-prompt">$</span><code>npx <span class="nb">@jayhackpro/jayshield</span> <span class="nb">./public_html</span></code><span class="copy-icon" aria-hidden="true">⧉</span></button>
         </div>
         <div class="install-card">
           <p class="install-label">Prove it works, with the EICAR test file</p>
-          <button class="copy-cmd wide" data-cmd="npx @jayhackpro/jayshield --selftest"><span class="copy-prompt">$</span><code>npx @jayhackpro/jayshield --selftest</code><span class="copy-icon" aria-hidden="true">⧉</span></button>
+          <button class="copy-cmd wide" data-cmd="npx @jayhackpro/jayshield --selftest"><span class="copy-prompt">$</span><code>npx <span class="nb">@jayhackpro/jayshield</span> <span class="nb">--selftest</span></code><span class="copy-icon" aria-hidden="true">⧉</span></button>
         </div>
         <div class="install-card">
           <p class="install-label">Install once, call it by name</p>
-          <button class="copy-cmd wide" data-cmd="npm install -g @jayhackpro/jayshield"><span class="copy-prompt">$</span><code>npm install -g @jayhackpro/jayshield</code><span class="copy-icon" aria-hidden="true">⧉</span></button>
+          <button class="copy-cmd wide" data-cmd="npm install -g @jayhackpro/jayshield"><span class="copy-prompt">$</span><code>npm install <span class="nb">-g</span> <span class="nb">@jayhackpro/jayshield</span></code><span class="copy-icon" aria-hidden="true">⧉</span></button>
         </div>
       </div>
-      <p class="install-foot">Exit codes make it drop straight into CI: <code>0</code> clean, <code>1</code> threats found, <code>2</code> error. Add <code>--json</code> for machine readable output.</p>
+      <p class="install-foot">Exit codes make it drop straight into CI: <code>0</code> clean, <code>1</code> threats found, <code>2</code> error. Add <code>--json</code> for machine-readable output.</p>
     </div>
   </section>
 
