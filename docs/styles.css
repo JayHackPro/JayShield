@@ -57,7 +57,46 @@ body::after {
 a { color: var(--green); text-decoration: none; }
 a:hover { color: var(--green-bright); }
 
-::selection { background: rgba(70, 240, 138, 0.28); color: #eafff1; }
+/* Themed highlight: selecting text looks like a selection in a green terminal. */
+::selection { background: #46f08a; color: #04140a; text-shadow: none; }
+::-moz-selection { background: #46f08a; color: #04140a; text-shadow: none; }
+
+/* A cool, on brand scrollbar: a glowing green thumb on a deep track. */
+html { scrollbar-color: #46f08a #080d0a; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 13px; height: 13px; }
+::-webkit-scrollbar-track { background: #080d0a; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5ff39a, #2ea866);
+  border-radius: 10px;
+  border: 3px solid #080d0a;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.45), 0 0 8px rgba(70, 240, 138, 0.35);
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #8effb6, #46f08a); }
+::-webkit-scrollbar-corner { background: #080d0a; }
+
+/* Back to top: a terminal chip that expands to a shell command on hover. */
+.to-top {
+  position: fixed; right: 22px; bottom: 22px; z-index: 70;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 46px; padding: 0 15px;
+  background: var(--panel); color: var(--green);
+  border: 1px solid var(--line-strong); border-radius: 12px;
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  opacity: 0; transform: translateY(14px) scale(0.96); pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease, box-shadow 0.24s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover {
+  color: var(--green-bright); border-color: var(--green); transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(70, 240, 138, 0.35);
+}
+.to-top:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.to-top .tt-arrow { font-size: 0.82rem; line-height: 1; text-shadow: 0 0 12px var(--glow); animation: tt-bob 2.4s ease-in-out infinite; }
+.to-top .tt-label { max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; transition: max-width 0.3s ease, opacity 0.22s ease; }
+.to-top:hover .tt-label { max-width: 76px; opacity: 1; }
+@keyframes tt-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
@@ -362,7 +401,7 @@ h2 {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .scanline, .caret, .cursor { animation: none; }
+  .scanline, .caret, .cursor, .to-top .tt-arrow { animation: none; }
   .scanline { display: none; }
-  .card { transition: none; }
+  .card, .to-top { transition: opacity 0.2s ease; }
 }

@@ -32,6 +32,14 @@
     });
   }
 
+  // ----- Back to top: reveal the chip once the reader has scrolled a screen.
+  const toTop = document.querySelector(".to-top");
+  if (toTop) {
+    const onScroll = () => toTop.classList.toggle("show", window.scrollY > 620);
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
   // ----- Matrix rain, faint, behind the page.
   const canvas = document.querySelector(".rain");
   if (canvas && !reduced) startRain(canvas);
