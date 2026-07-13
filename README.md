@@ -27,7 +27,7 @@ wrong.
 
 JayShield does it in seconds. It reads every file, matches it against a library
 of malware techniques, checks its exact fingerprint against known bad files,
-and looks for the tell tale shapes of packed and hidden code. Then it shows you
+and looks for the telltale shapes of packed and hidden code. Then it shows you
 a clear, ranked report and offers to move the threats into a local vault so your
 site stops serving them right away.
 
@@ -42,7 +42,7 @@ No install required, run it straight from npm:
 npx @jayhackpro/jayshield ./public_html
 ```
 
-Prove it works on your machine first, using the harmless industry standard test file:
+Prove it works on your machine first, using the harmless, industry-standard test file:
 
 ```bash
 npx @jayhackpro/jayshield --selftest
@@ -73,8 +73,8 @@ A report ranked by severity, with the exact line and a plain-language reason for
   `$_GET` and `$_POST`, the `preg_replace` `/e` trick, remote payloads that are
   fetched and run, hardcoded password gates, and reverse shells.
 - **Obfuscation**: decode then run payloads, character code and hex string
-  tricks, packed one liners, and large encoded blobs paired with a decoder.
-- **Injected front end malware**: hidden or zero size iframes, `document.write`
+  tricks, packed one-liners, and large encoded blobs paired with a decoder.
+- **Injected front-end malware**: hidden or zero-size iframes, `document.write`
   of unescaped markup, `eval(atob(...))`, and redirects to decoded URLs.
 - **Cryptocurrency miners**: CoinHive and the browser mining scripts that spend
   your visitors' devices.
@@ -135,7 +135,7 @@ jayshield [paths...] [options]
 | `--vault <dir>` | Quarantine folder (default `.jayshield-quarantine`) |
 | `--follow-symlinks` | Follow symbolic links (off by default) |
 | `--dry-run` | Show actions without changing anything |
-| `--json` | Machine readable output for pipelines |
+| `--json` | Machine-readable output for pipelines |
 | `--no-color` | Plain text |
 | `--no-banner` | Hide the startup banner |
 | `--banner` | Print the JayHackPro banner and exit |
