@@ -62,7 +62,7 @@ The examples below write `jayshield` for short, meaning however you choose to ru
 A report ranked by severity, with the exact line and a plain-language reason for every finding:
 
 <div align="center">
-<img src="docs/assets/scan.png" alt="A JayShield scan: the JayHackPro banner, a CRITICAL obfuscated eval finding and a HIGH hidden-iframe finding, a severity summary, and a safe-removal hint" width="860">
+<img src="docs/assets/scan.png" alt="A JayShield scan: the JayHackPro logo, a CRITICAL obfuscated eval finding and a HIGH hidden-iframe finding, a severity summary, and a safe-removal hint" width="860">
 </div>
 
 ## What it catches
