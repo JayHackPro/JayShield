@@ -54,23 +54,23 @@
     addEventListener("resize", resize);
 
     let last = 0;
-    const step = 66; // about 15 fps, gentle and light on the cpu
+    const step = 90; // about 11 fps, slow and light on the cpu
     function frame(t) {
       requestAnimationFrame(frame);
       if (t - last < step) return;
       last = t;
-      ctx.fillStyle = "rgba(5, 8, 7, 0.22)";
+      ctx.fillStyle = "rgba(5, 8, 7, 0.34)"; // higher fade means shorter, calmer trails
       ctx.fillRect(0, 0, w, h);
       ctx.font = fontSize + "px monospace";
       for (let i = 0; i < cols; i++) {
         const x = i * fontSize;
         const y = drops[i] * fontSize;
         const ch = glyphs[(Math.random() * glyphs.length) | 0];
-        // The leading glyph is brighter, the trail is dim green.
-        ctx.fillStyle = Math.random() < 0.04 ? "rgba(160, 255, 200, 0.55)" : "rgba(70, 240, 138, 0.30)";
+        // The leading glyph is a touch brighter, the trail is dim green.
+        ctx.fillStyle = Math.random() < 0.025 ? "rgba(150, 250, 190, 0.45)" : "rgba(70, 240, 138, 0.24)";
         if (y > 0) ctx.fillText(ch, x, y);
-        if (y > h && Math.random() > 0.975) drops[i] = Math.random() * -20;
-        drops[i] += 0.5;
+        if (y > h && Math.random() > 0.98) drops[i] = Math.random() * -20;
+        drops[i] += 0.4;
       }
     }
     requestAnimationFrame(frame);

@@ -71,21 +71,24 @@ a:hover { color: var(--green-bright); }
 }
 .skip-link:focus { transform: translateY(0); }
 
-/* Matrix rain, faint, behind everything. */
+/* Matrix rain, kept faint and masked out of the central reading column so it
+   lives quietly in the margins and never competes with the text. */
 .rain {
   position: fixed; inset: 0; z-index: 0;
   width: 100%; height: 100%;
-  opacity: 0.5;
+  opacity: 0.2;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.04) 22%, rgba(0, 0, 0, 0.04) 78%, #000 100%);
+  mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.04) 22%, rgba(0, 0, 0, 0.04) 78%, #000 100%);
 }
 
-/* A slow scan beam that sweeps down the page. */
+/* A slow, faint scan beam that drifts down the page. */
 .scanline {
-  position: fixed; left: 0; right: 0; top: 0; height: 160px; z-index: 2;
+  position: fixed; left: 0; right: 0; top: 0; height: 180px; z-index: 2;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(70, 240, 138, 0.05) 60%, rgba(70, 240, 138, 0.10));
-  border-bottom: 1px solid rgba(70, 240, 138, 0.14);
-  animation: sweep 9s linear infinite;
+  background: linear-gradient(180deg, transparent, rgba(70, 240, 138, 0.025) 60%, rgba(70, 240, 138, 0.05));
+  border-bottom: 1px solid rgba(70, 240, 138, 0.07);
+  animation: sweep 15s linear infinite;
 }
 @keyframes sweep {
   0% { transform: translateY(-180px); opacity: 0; }
