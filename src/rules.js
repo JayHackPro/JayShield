@@ -135,14 +135,24 @@ export const RULES = [
     references: ["https://owasp.org/www-community/attacks/Command_Injection"]
   },
   {
-    id: "php.backtick_exec",
-    name: "Backtick shell execution of input",
-    severity: "high",
-    category: "exec",
+    id: "php.call_user_func_input",
+    name: "Function name chosen by request input",
+    severity: "critical",
+    category: "backdoor",
     kinds: ["php"],
-    pattern: /`[^`]*\$_(?:GET|POST|REQUEST|COOKIE)[^`]*`/,
-    description: "PHP backticks run a shell command, and this one is built from request input.",
-    references: ["https://www.php.net/manual/en/language.operators.execution.php"]
+    pattern: /\bcall_user_func(?:_array)?\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)\b/i,
+    description: "Lets the request name the function to run, a compact backdoor.",
+    references: ["https://owasp.org/www-community/attacks/Web_Shell"]
+  },
+  {
+    id: "php.extract_input",
+    name: "extract of request input",
+    severity: "medium",
+    category: "injection",
+    kinds: ["php"],
+    pattern: /\bextract\s*\(\s*\$_(?:GET|POST|REQUEST|SERVER|COOKIE)\b/i,
+    description: "Turns request keys into local variables, which lets an attacker overwrite values the code trusts.",
+    references: ["https://www.php.net/manual/en/function.extract.php"]
   },
   {
     id: "php.reverse_shell",
@@ -150,8 +160,8 @@ export const RULES = [
     severity: "critical",
     category: "backdoor",
     kinds: ["php", "python", "perl"],
-    pattern: /\bfsockopen\s*\([^)]*\)|\/bin\/(?:ba)?sh\s*-i|socket_create\s*\(\s*AF_INET/i,
-    description: "Opens a network socket to hand a shell back to the attacker.",
+    pattern: /\/bin\/(?:ba)?sh\s+-i|\bfsockopen\s*\([^)]{0,160}\)\s*;?\s*(?:\$\w+\s*=\s*)?(?:exec|shell_exec|proc_open|passthru|system|popen)\s*\(/i,
+    description: "Opens a network socket and hands a shell back to the attacker.",
     references: ["https://owasp.org/www-community/attacks/Web_Shell"]
   },
   {
@@ -197,7 +207,7 @@ export const RULES = [
   {
     id: "php.upload_handler",
     name: "Unrestricted file upload handler",
-    severity: "medium",
+    severity: "low",
     category: "upload",
     kinds: ["php"],
     pattern: /\bmove_uploaded_file\s*\(\s*\$_FILES\b/i,
@@ -262,18 +272,18 @@ export const RULES = [
     severity: "high",
     category: "webshell",
     kinds: ["php", "html", "other"],
-    pattern: /(?:Safe\s*Mode|safe_mode)\s*:\s*<|uname\s*-a|Powered\s*by\s*[A-Za-z0-9]+\s*Shell|Hacked\s*By|Defaced\s*by/i,
+    pattern: /Hacked\s*By\b|Defaced\s*by\b|Powered\s*by\s*[A-Za-z0-9]+\s*Shell\b|\bShell\s*by\s*[A-Za-z0-9]+|Mass\s*Deface/i,
     description: "Text seen on the pages that webshells and defacement kits print.",
     references: ["https://owasp.org/www-community/attacks/Web_Shell"]
   },
   {
     id: "php.password_gate",
-    name: "Hardcoded password gate over eval",
+    name: "Hardcoded password gate",
     severity: "high",
     category: "backdoor",
     kinds: ["php"],
-    pattern: /if\s*\(\s*(?:md5|sha1)\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)/i,
-    description: "Hashes a request value to unlock hidden functionality, the login check of a private backdoor.",
+    pattern: /\b(?:md5|sha1|crc32|hash)\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)\b[^)]{0,40}\)\s*===?\s*(['"])[0-9a-f]{16,64}\1/i,
+    description: "Hashes a request value and compares it to a fixed hash, the login check of a private backdoor.",
     references: ["https://owasp.org/www-community/attacks/Web_Shell"]
   },
 

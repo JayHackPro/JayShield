@@ -19,6 +19,21 @@ test("flags PHP hidden inside a file that claims to be an image", () => {
   assert.ok(idsFor("avatar.jpg", "GIF89a<?php system($_GET['c']); ?>").includes("heuristic.php_in_media"));
 });
 
+test("catches PHP hidden in a REAL binary image, the classic upload bypass", () => {
+  // A PNG header carries null bytes, so this file looks binary. Skipping it
+  // would miss exactly this polyglot. The webshell is appended at the end.
+  const png = Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d]),
+    Buffer.from('<?php system($_GET["c"]); ?>')
+  ]);
+  assert.ok(scanBuffer("avatar.png", png).map((f) => f.id).includes("heuristic.php_in_media"));
+});
+
+test("a null byte cannot hide code inside a script file", () => {
+  const buf = Buffer.concat([Buffer.from([0]), Buffer.from("<?php eval(base64_decode($_POST['x']));")]);
+  assert.ok(scanBuffer("x.php", buf).map((f) => f.id).includes("php.eval_decode"));
+});
+
 test("flags an executable wearing a harmless second extension", () => {
   assert.ok(idsFor("invoice.pdf.php", "<?php // planted").includes("heuristic.double_extension"));
 });

@@ -9,12 +9,15 @@
 import { promises as fs } from "node:fs";
 import { walk, DEFAULT_SKIP_DIRS } from "./walk.js";
 import { rulesForKind, globalize, kindForPath } from "./rules.js";
-import { runHeuristics, evidenceAt } from "./heuristics.js";
+import { runHeuristics, runByteHeuristics, evidenceAt } from "./heuristics.js";
 import { matchHash } from "./hashes.js";
 
 export const SEVERITY_RANK = { critical: 4, high: 3, medium: 2, low: 1 };
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 const MATCHES_PER_RULE = 25;
+// Files with these kinds are always read as text, even if a stray null byte
+// would otherwise mark them binary, so a null cannot be used to hide code.
+const SCRIPT_KINDS = new Set(["php", "js", "html", "asp", "python", "perl", "shell"]);
 
 /** Is this buffer most likely binary? Checks for NUL bytes in the head. */
 function looksBinary(buffer) {
@@ -59,8 +62,14 @@ export function scanBuffer(filePath, buffer, options = {}) {
   const hashHit = matchHash(buffer, options.extraHashes);
   if (hashHit && !ignore.has(hashHit.id)) findings.push(hashHit);
 
-  const binary = looksBinary(buffer);
-  if (!binary) {
+  // Byte and path checks run on every file, so a webshell hidden inside a
+  // real (binary) image is still caught.
+  for (const h of runByteHeuristics(filePath, buffer)) {
+    if (!ignore.has(h.id)) findings.push(h);
+  }
+
+  const doText = !looksBinary(buffer) || SCRIPT_KINDS.has(kind);
+  if (doText) {
     const text = buffer.toString("utf8");
 
     for (const rule of rulesForKind(kind, ignore)) {

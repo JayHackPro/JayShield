@@ -45,48 +45,88 @@ export function longestLine(text) {
   return current > longest ? current : longest;
 }
 
-const EXECUTABLE_KINDS = new Set(["php", "asp", "perl"]);
 const MEDIA_OR_DOC = new Set([
   ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".ico", ".svg",
   ".pdf", ".txt", ".csv", ".doc", ".docx", ".xls", ".xlsx", ".zip"
 ]);
+const EXECUTABLE_KINDS = new Set(["php", "asp", "perl"]);
 // Web-served upload and media locations, where only static files belong.
 // Anchored to real path shapes so a system ancestor like /tmp never counts.
 const UPLOAD_PATH = /(?:wp-content\/(?:uploads|cache)|\/uploads?\/|\/media\/|\/attachments?\/|\/userfiles?\/)/i;
 
+const PHP_TAG = Buffer.from("<?php");
+const PHP_SHORT = Buffer.from("<?=");
+
+/** Byte offset of the first PHP open tag anywhere in a buffer, or -1. */
+function phpTagOffset(buffer) {
+  const a = buffer.indexOf(PHP_TAG);
+  const b = buffer.indexOf(PHP_SHORT);
+  if (a === -1) return b;
+  if (b === -1) return a;
+  return Math.min(a, b);
+}
+
 /**
- * Run the context and shape heuristics for one file.
+ * Byte and path heuristics. These run on EVERY file, including ones that look
+ * binary, because the classic upload bypass is a real image (binary, full of
+ * null bytes) with PHP appended to the end. Skipping binary files would miss
+ * exactly that attack.
+ */
+export function runByteHeuristics(filePath, buffer) {
+  const findings = [];
+  const lower = filePath.toLowerCase();
+  const base = path.basename(lower);
+  const ext = path.extname(lower);
+  const kind = kindForPath(filePath);
+
+  // A file that claims to be an image or document but carries runnable PHP.
+  if (MEDIA_OR_DOC.has(ext)) {
+    const at = phpTagOffset(buffer);
+    if (at !== -1) {
+      findings.push({
+        id: "heuristic.php_in_media",
+        name: "PHP code inside a media or document file",
+        severity: "critical",
+        category: "webshell",
+        line: 1,
+        evidence: `PHP open tag at byte ${at}`,
+        description: "This file pretends to be an image or document but contains runnable PHP, a common way to smuggle a shell past upload filters."
+      });
+    }
+  }
+
+  // A double extension that ends in an executable type, like invoice.pdf.php.
+  if (EXECUTABLE_KINDS.has(kind) && /\.(?:jpg|jpeg|png|gif|pdf|doc|txt|zip)\.(?:php\d?|phtml|pht|asp|aspx|pl|cgi)$/i.test(base)) {
+    findings.push({
+      id: "heuristic.double_extension",
+      name: "Executable file wearing a harmless second extension",
+      severity: "high",
+      category: "webshell",
+      line: 1,
+      evidence: base,
+      description: "A name like photo.jpg.php is built to look safe while still running as code."
+    });
+  }
+
+  return findings;
+}
+
+/**
+ * Text heuristics for source files. The caller decides which files reach here:
+ * text files, and script files even when a stray null byte would otherwise
+ * mark them binary, so a null cannot be used to hide code.
  *
  * @param {object} file
  * @param {string} file.path
- * @param {Buffer} file.buffer   raw bytes
- * @param {string} file.text     decoded text (utf8)
- * @param {string} file.kind     from kindForPath
- * @returns {Array<{id:string,name:string,severity:string,category:string,line:number,evidence:string,description:string}>}
+ * @param {Buffer} file.buffer
+ * @param {string} file.text
+ * @param {string} file.kind
  */
 export function runHeuristics(file) {
   const findings = [];
-  const lower = file.path.toLowerCase();
-  const posix = lower.replace(/\\/g, "/");
-  const base = path.basename(lower);
-  const ext = path.extname(lower);
+  const posix = file.path.toLowerCase().replace(/\\/g, "/");
 
-  // A PHP open tag inside a file that claims to be an image or a document.
-  // Real images never contain runnable PHP.
-  if (MEDIA_OR_DOC.has(ext) && /<\?php\b|<\?=/.test(file.text)) {
-    findings.push(mk(
-      "heuristic.php_in_media",
-      "PHP code inside a media or document file",
-      "critical",
-      "webshell",
-      file.text,
-      /<\?php\b|<\?=/,
-      "This file pretends to be an image or document but contains runnable PHP, a common way to smuggle a shell past upload filters."
-    ));
-  }
-
-  // An executable script sitting in an uploads or media folder, where only
-  // static files belong.
+  // An executable script sitting in an uploads or media folder.
   if (EXECUTABLE_KINDS.has(file.kind) && UPLOAD_PATH.test(posix)) {
     findings.push(mk(
       "heuristic.exec_in_uploads",
@@ -99,21 +139,8 @@ export function runHeuristics(file) {
     ));
   }
 
-  // A double extension that ends in an executable type, like invoice.pdf.php.
-  if (EXECUTABLE_KINDS.has(file.kind) && /\.(?:jpg|jpeg|png|gif|pdf|doc|txt|zip)\.(?:php\d?|phtml|pht|asp|aspx|pl|cgi)$/i.test(base)) {
-    findings.push(mk(
-      "heuristic.double_extension",
-      "Executable file wearing a harmless second extension",
-      "high",
-      "webshell",
-      file.text,
-      /.*/,
-      "A name like photo.jpg.php is built to look safe while still running as code."
-    ));
-  }
-
-  // Very high entropy in a text-based source file means the real content is
-  // packed or encrypted, which legitimate source rarely is.
+  // Very high entropy in a text-based source file means packed or encrypted
+  // content, which legitimate source rarely is.
   if (file.kind === "php" || file.kind === "asp" || file.kind === "perl") {
     const entropy = shannonEntropy(file.buffer);
     if (entropy >= 5.6 && file.buffer.length >= 512) {
@@ -130,7 +157,7 @@ export function runHeuristics(file) {
   }
 
   // A single enormous line in a server script is almost always a minified
-  // one-liner payload rather than hand-written code.
+  // one-line payload rather than hand-written code.
   if ((file.kind === "php" || file.kind === "asp") && longestLine(file.text) >= 2000) {
     findings.push(mk(
       "heuristic.long_line",
@@ -143,8 +170,8 @@ export function runHeuristics(file) {
     ));
   }
 
-  // A large base64 blob assigned to a variable, then handed straight to a
-  // decoder, is the loader half of most packed shells.
+  // A large base64 blob assigned to a variable, then handed to a decoder, is
+  // the loader half of most packed shells.
   const blob = /['"][A-Za-z0-9+/]{200,}={0,2}['"]/;
   if ((file.kind === "php" || file.kind === "js") && blob.test(file.text) && /(?:base64_decode|atob|gzinflate|gzuncompress)/.test(file.text)) {
     findings.push(mk(

@@ -3,6 +3,36 @@
 All notable changes to JayShield are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.1.0 - 2026-07-13
+
+A precision and coverage pass, verified against real code.
+
+### Added
+
+- Polyglot detection: a webshell hidden inside a real (binary) image, the
+  classic upload bypass, is now caught. Byte and path checks run on every
+  file, and script files are always read as text, so a stray null byte can no
+  longer be used to hide code from the scanner.
+- Two high signal rules: a function whose name comes from request input
+  (`call_user_func`), and `extract` of request input.
+
+### Changed
+
+- Tightened the reverse shell, webshell banner, and password gate rules so
+  they need real malicious code, not a passing mention in a doc comment.
+- The upload handler rule is now a low severity advisory, since a plain upload
+  form is normal in healthy code.
+
+### Removed
+
+- The backtick execution rule, which matched ordinary markdown backticks in
+  documentation and was the main source of noise.
+
+### Fixed
+
+- Verified a clean scan, with zero false positives, across WordPress core,
+  jQuery, and the Laravel framework.
+
 ## 1.0.0 - 2026-07-13
 
 The first public release.

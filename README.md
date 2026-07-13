@@ -38,24 +38,27 @@ it anywhere Node is installed.
 
 ## Quick start
 
-No install required:
+Run it straight from GitHub, no install and no dependencies to download:
 
 ```bash
-npx @jayhackpro/jayshield ./public_html
+npx github:JayHackPro/JayShield ./public_html
 ```
 
-Or install it once:
+Prove it works on your machine first, using the harmless industry standard test file:
 
 ```bash
-npm install -g @jayhackpro/jayshield
-jayshield ./public_html
+npx github:JayHackPro/JayShield --selftest
 ```
 
-Prove it works on your machine, using the harmless industry standard test file:
+Prefer a local copy? Clone it and run it directly:
 
 ```bash
-jayshield --selftest
+git clone https://github.com/JayHackPro/JayShield.git
+node JayShield/bin/jayshield.js ./public_html
 ```
+
+The examples below write `jayshield` for short. That means whichever way you run
+it: the `npx` command above, or `node bin/jayshield.js` from a clone.
 
 ## What it catches
 
@@ -174,6 +177,12 @@ jayshield ./public_html --json > jayshield-report.json
 ```
 
 ## Use it from code
+
+Install it from GitHub, then import the pieces you need:
+
+```bash
+npm install github:JayHackPro/JayShield
+```
 
 ```js
 import { scan, quarantineFiles } from "@jayhackpro/jayshield";
