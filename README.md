@@ -1,20 +1,17 @@
 <div align="center">
 
-# JayShield&reg;
+<img src="docs/assets/hero.png" alt="JayShield by JayHackPro, find and remove web malware" width="100%">
 
-### Find and remove web malware, webshells, and backdoors.
+A fast, dependency-free malware scanner and remover for websites and servers.<br>
+Point it at a folder, see exactly what is infected, then quarantine the threats safely.
 
-A fast, dependency free malware scanner and remover for websites and servers.
-Point it at a folder, see exactly what is infected, then quarantine the threats
-safely. Nothing is ever deleted without your say so.
+[![npm](https://img.shields.io/npm/v/@jayhackpro/jayshield?color=46f08a&labelColor=0b120e&logo=npm&logoColor=white)](https://www.npmjs.com/package/@jayhackpro/jayshield)
+[![License](https://img.shields.io/badge/license-MIT-46f08a?labelColor=0b120e)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A518-46f08a?labelColor=0b120e)](package.json)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-46f08a?labelColor=0b120e)](package.json)
+[![CI](https://img.shields.io/github/actions/workflow/status/JayHackPro/JayShield/ci.yml?branch=main&label=tests&color=46f08a&labelColor=0b120e)](https://github.com/JayHackPro/JayShield/actions)
 
-[![npm](https://img.shields.io/npm/v/@jayhackpro/jayshield?color=brightgreen)](https://www.npmjs.com/package/@jayhackpro/jayshield)
-[![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](package.json)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
-[![CI](https://github.com/JayHackPro/JayShield/actions/workflows/ci.yml/badge.svg)](https://github.com/JayHackPro/JayShield/actions)
-
-**[Website](https://jayhackpro.github.io/JayShield/)** · **[npm](https://www.npmjs.com/package/@jayhackpro/jayshield)** · by **[JayHackPro](https://www.JayHackPro.com)**
+**[Website](https://jayhackpro.github.io/JayShield/)**  ·  **[npm](https://www.npmjs.com/package/@jayhackpro/jayshield)**  ·  by **[JayHackPro](https://www.JayHackPro.com)**
 
 </div>
 
@@ -60,6 +57,14 @@ jayshield ./public_html
 
 The examples below write `jayshield` for short, meaning however you choose to run it.
 
+## What a scan looks like
+
+A report ranked by severity, with the exact line and a plain-language reason for every finding:
+
+<div align="center">
+<img src="docs/assets/scan.png" alt="A JayShield scan: the JayHackPro banner, a CRITICAL obfuscated eval finding and a HIGH hidden-iframe finding, a severity summary, and a safe-removal hint" width="860">
+</div>
+
 ## What it catches
 
 - **Webshells**: c99, r57, WSO, b374k, FilesMan, and the generic remote file
@@ -80,41 +85,6 @@ The examples below write `jayshield` for short, meaning however you choose to ru
   uploads folder where only static files belong.
 - **Known bad files**: exact matches against a hash set you can extend, plus the
   EICAR antivirus test file.
-
-## What a scan looks like
-
-```
-
-     ██╗ █████╗ ██╗   ██╗██╗  ██╗ █████╗  ██████╗██╗  ██╗██████╗ ██████╗  ██████╗
-     ██║██╔══██╗╚██╗ ██╔╝██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔══██╗██╔═══██╗
-     ██║███████║ ╚████╔╝ ███████║███████║██║     █████╔╝ ██████╔╝██████╔╝██║   ██║
-██   ██║██╔══██║  ╚██╔╝  ██╔══██║██╔══██║██║     ██╔═██╗ ██╔═══╝ ██╔══██╗██║   ██║
-╚█████╔╝██║  ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗██║     ██║  ██║╚██████╔╝
- ╚════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝
-
-  JayShield®  ·  find and remove web malware   v1.2.1
-  github.com/JayHackPro/JayShield
-
-  Scanned 1,284 files (24.6 MB) in 0.9 s
-
-  CRITICAL public_html/wp-content/uploads/2026/logo.php
-     ✕ Obfuscated eval of a decoded payload:1
-       Code is hidden inside a decode call and run on the fly, the hallmark of a packed webshell.
-       > <?php @eval(base64_decode($_POST["cmd"])); ?>
-     ▲ Executable script in an uploads folder:1
-       Upload and media folders should hold only static files. An executable script here is very often a planted backdoor.
-
-  HIGH     public_html/index.html
-     ▲ Hidden or zero-size iframe:42
-       An invisible iframe usually delivers malware or ad fraud to visitors without a trace on the page.
-
-  Summary
-  critical 1   high 1   medium 0   low 0
-  2 files infected, 1,282 clean
-
-  Review the findings, then remove them safely with:
-      jayshield public_html --quarantine
-```
 
 ## Remove threats safely
 

