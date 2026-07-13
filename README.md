@@ -11,6 +11,7 @@ safely. Nothing is ever deleted without your say so.
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
+[![CI](https://github.com/JayHackPro/JayShield/actions/workflows/ci.yml/badge.svg)](https://github.com/JayHackPro/JayShield/actions)
 
 **by [JayHackPro](https://www.JayHackPro.com)**
 
