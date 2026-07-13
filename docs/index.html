@@ -1,0 +1,236 @@
+<!doctype html>
+<!-- JayShield by JayHackPro. Released under JayHackPro® Inc. Designed by Jayden Yoon ZK. https://github.com/JayHackPro/JayShield -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>JayShield by JayHackPro | Find and remove web malware</title>
+  <meta name="description" content="JayShield hunts down webshells, backdoors, obfuscated payloads, and injected miners across your files, then quarantines them safely. A fast, dependency-free malware scanner and remover by JayHackPro.">
+  <link rel="canonical" href="https://jayhackpro.github.io/JayShield/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='1.5' y='1.5' width='37' height='37' rx='9' fill='%2340f08a'/%3E%3Cpath d='M27 8.5v14.2a8.7 8.7 0 0 1-8.7 8.7 8.7 8.7 0 0 1-8.7-8.7h5.6a3.1 3.1 0 0 0 3.1 3.1 3.1 3.1 0 0 0 3.1-3.1V8.5z' fill='%23041109'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jayhackpro.github.io/JayShield/">
+  <meta property="og:title" content="JayShield by JayHackPro | Find and remove web malware">
+  <meta property="og:description" content="Hunt down webshells, backdoors, and hidden malware across your files, then quarantine them safely. Fast, dependency-free, open source.">
+  <meta property="og:image" content="https://jayhackpro.github.io/JayShield/assets/social-preview.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="JayShield by JayHackPro">
+  <meta name="twitter:description" content="Find and remove web malware, webshells, and backdoors. Fast, dependency-free, open source.">
+  <meta name="twitter:image" content="https://jayhackpro.github.io/JayShield/assets/social-preview.png">
+  <link rel="stylesheet" href="styles.css?v=1">
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<canvas class="rain" aria-hidden="true"></canvas>
+<div class="scanline" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <div class="wrap nav-bar">
+    <a class="brand" href="#top" aria-label="JayHackPro JayShield">
+      <svg class="brand-mark" viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="37" height="37" rx="9" fill="var(--green)"/>
+        <path d="M27 8.5v14.2a8.7 8.7 0 0 1-8.7 8.7 8.7 8.7 0 0 1-8.7-8.7h5.6a3.1 3.1 0 0 0 3.1 3.1 3.1 3.1 0 0 0 3.1-3.1V8.5z" fill="#041109"/>
+      </svg>
+      <span class="brand-name">JayShield<span class="brand-by"> by JayHackPro</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#catches">Detects</a>
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/JayHackPro/JayShield" class="nav-ext">GitHub</a>
+      <a href="https://www.npmjs.com/package/@jayhackpro/jayshield" class="nav-ext nav-npm">npm</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="prompt">root@server</span><span class="tilde">:~#</span> incident response, automated</p>
+      <h1>Find the malware<br>hiding in your website.</h1>
+      <p class="lede">When a site gets hacked, the attacker leaves something behind: a webshell in the uploads folder, a backdoor bolted onto a real file, a miner buried in a script. <strong>JayShield</strong> finds it in seconds and quarantines it safely, without ever deleting your data.</p>
+      <div class="cta-row">
+        <button class="copy-cmd" data-cmd="npx @jayhackpro/jayshield ./public_html" aria-label="Copy install command">
+          <span class="copy-prompt">$</span>
+          <code>npx @jayhackpro/jayshield ./public_html</code>
+          <span class="copy-icon" aria-hidden="true">⧉</span>
+        </button>
+        <a class="btn-ghost" href="https://github.com/JayHackPro/JayShield">View source →</a>
+      </div>
+      <ul class="hero-facts">
+        <li><b>0</b> dependencies</li>
+        <li><b>51</b> tests</li>
+        <li><b>MIT</b> licensed</li>
+        <li><b>Node 18+</b></li>
+      </ul>
+    </div>
+
+    <div class="terminal" role="img" aria-label="A JayShield scan finding a webshell, a hidden iframe, and an image polyglot, then reporting them by severity.">
+      <div class="term-bar">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span class="term-title">jayshield</span>
+        <button class="term-replay" type="button" aria-label="Replay the scan">↻</button>
+      </div>
+      <div class="term-body" id="term"></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="strip" aria-label="At a glance">
+    <div class="wrap strip-row">
+      <span><span class="tick">▹</span> Webshells and backdoors</span>
+      <span><span class="tick">▹</span> Obfuscated payloads</span>
+      <span><span class="tick">▹</span> Image polyglots</span>
+      <span><span class="tick">▹</span> Miners and skimmers</span>
+      <span><span class="tick">▹</span> Known bad hashes</span>
+    </div>
+  </section>
+
+  <section class="section" id="catches">
+    <div class="wrap">
+      <p class="kicker">// detections</p>
+      <h2>Built to catch how sites really get hacked.</h2>
+      <p class="section-lede">One rule catches a whole technique, not a single strain, so JayShield finds the copies too. Signatures, hashes, and shape based heuristics, layered together.</p>
+      <div class="cards">
+        <article class="card">
+          <div class="card-ico" aria-hidden="true">&#128126;</div>
+          <h3>Webshells</h3>
+          <p>c99, r57, WSO, b374k, FilesMan, and the generic remote file managers and command runners built on the same patterns.</p>
+        </article>
+        <article class="card">
+          <div class="card-ico" aria-hidden="true">&#128682;</div>
+          <h3>Backdoors</h3>
+          <p>eval of request input, variable functions driven by the query string, the preg_replace trick, remote payloads that fetch and run, and reverse shells.</p>
+        </article>
+        <article class="card">
+          <div class="card-ico" aria-hidden="true">&#129520;</div>
+          <h3>Obfuscation</h3>
+          <p>Decode then run payloads, character and hex tricks, packed one liners, and the big encoded blobs that hide a shell in plain sight.</p>
+        </article>
+        <article class="card">
+          <div class="card-ico" aria-hidden="true">&#128247;</div>
+          <h3>Image polyglots</h3>
+          <p>The classic upload bypass: a real image with PHP appended to the end. Byte level checks catch it even though the file looks binary.</p>
+        </article>
+        <article class="card">
+          <div class="card-ico" aria-hidden="true">&#9935;</div>
+          <h3>Miners and skimmers</h3>
+          <p>In browser cryptocurrency miners, hidden iframes, and the scripts that quietly copy a visitor session off to another server.</p>
+        </article>
+        <article class="card">
+          <div class="card-ico" aria-hidden="true">&#128273;</div>
+          <h3>Known bad files</h3>
+          <p>Exact hash matches against a set you can extend, plus the EICAR test file so you can prove the scanner is wired up correctly.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="how">
+    <div class="wrap how-grid">
+      <div class="how-copy">
+        <p class="kicker">// remediation</p>
+        <h2>Remove threats without losing a byte.</h2>
+        <p class="section-lede">JayShield never deletes your files. Quarantine moves each flagged file into a local vault and records where it came from, so your live site stops serving it at once while every byte is kept.</p>
+        <ul class="how-list">
+          <li><span class="how-num">01</span> <div><b>Scan</b> read only by default. Nothing on disk changes until you say so.</div></li>
+          <li><span class="how-num">02</span> <div><b>Quarantine</b> flagged files move into a sealed local vault, out of the web root.</div></li>
+          <li><span class="how-num">03</span> <div><b>Restore</b> put anything back, byte for byte, if a detection was wrong.</div></li>
+        </ul>
+        <p class="how-note">Purge is the only destructive action, and it never runs without an explicit confirmation.</p>
+      </div>
+      <div class="how-term" aria-hidden="true">
+        <div class="mini-term">
+          <div class="mini-line"><span class="mp">$</span> jayshield ./public_html --quarantine</div>
+          <div class="mini-line dim">moving threats into the vault...</div>
+          <div class="mini-line"><span class="sv-crit">✕</span> uploads/logo.php <span class="dim">quarantined</span></div>
+          <div class="mini-line"><span class="sv-crit">✕</span> uploads/thumb.png <span class="dim">quarantined</span></div>
+          <div class="mini-line"><span class="sv-high">▲</span> index.html <span class="dim">quarantined</span></div>
+          <div class="mini-line ok">✔ 3 threats sealed. restore any time with --restore</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="install">
+    <div class="wrap install-wrap">
+      <p class="kicker">// get started</p>
+      <h2>Run your first scan in one line.</h2>
+      <p class="section-lede">No account, no agent, no dependencies to download. It runs anywhere Node does.</p>
+      <div class="install-cards">
+        <div class="install-card">
+          <p class="install-label">Scan a folder, no install</p>
+          <button class="copy-cmd wide" data-cmd="npx @jayhackpro/jayshield ./public_html"><span class="copy-prompt">$</span><code>npx @jayhackpro/jayshield ./public_html</code><span class="copy-icon" aria-hidden="true">⧉</span></button>
+        </div>
+        <div class="install-card">
+          <p class="install-label">Prove it works, with the EICAR test file</p>
+          <button class="copy-cmd wide" data-cmd="npx @jayhackpro/jayshield --selftest"><span class="copy-prompt">$</span><code>npx @jayhackpro/jayshield --selftest</code><span class="copy-icon" aria-hidden="true">⧉</span></button>
+        </div>
+        <div class="install-card">
+          <p class="install-label">Install once, call it by name</p>
+          <button class="copy-cmd wide" data-cmd="npm install -g @jayhackpro/jayshield"><span class="copy-prompt">$</span><code>npm install -g @jayhackpro/jayshield</code><span class="copy-icon" aria-hidden="true">⧉</span></button>
+        </div>
+      </div>
+      <p class="install-foot">Exit codes make it drop straight into CI: <code>0</code> clean, <code>1</code> threats found, <code>2</code> error. Add <code>--json</code> for machine readable output.</p>
+    </div>
+  </section>
+
+  <section class="section section-brand" id="about">
+    <div class="wrap brand-grid">
+      <div>
+        <p class="kicker">// who builds this</p>
+        <h2>JayHackPro<span class="reg">®</span> Inc.</h2>
+        <p class="section-lede">A software development company focused on cybersecurity, based in Los Angeles, California. We build tools that make the web a safer place to be, and we open source the ones that help everyone.</p>
+        <p class="brand-slogan">"Let's make the world a better place."</p>
+        <div class="brand-links">
+          <a href="https://www.JayHackPro.com">JayHackPro.com</a>
+          <a href="https://github.com/JayHackPro">GitHub</a>
+          <a href="https://x.com/JayHackPro">X</a>
+          <a href="mailto:info@JayHackPro.com">info@JayHackPro.com</a>
+        </div>
+      </div>
+      <div class="brand-card" aria-hidden="true">
+        <div class="bc-prompt">jayhackpro@secure:~$ <span class="cursor">▮</span></div>
+        <div class="bc-lines">
+          <span><span class="ok">✔</span> open source</span>
+          <span><span class="ok">✔</span> zero telemetry</span>
+          <span><span class="ok">✔</span> zero dependencies</span>
+          <span><span class="ok">✔</span> reads in an afternoon</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="37" height="37" rx="9" fill="var(--green)"/>
+        <path d="M27 8.5v14.2a8.7 8.7 0 0 1-8.7 8.7 8.7 8.7 0 0 1-8.7-8.7h5.6a3.1 3.1 0 0 0 3.1 3.1 3.1 3.1 0 0 0 3.1-3.1V8.5z" fill="#041109"/>
+      </svg>
+      <span>JayShield</span>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="https://github.com/JayHackPro/JayShield">Source</a>
+      <a href="https://www.npmjs.com/package/@jayhackpro/jayshield">npm</a>
+      <a href="https://github.com/JayHackPro/JayShield/issues">Report an issue</a>
+      <a href="https://github.com/JayHackPro/JayShield/blob/main/CHANGELOG.md">Changelog</a>
+    </nav>
+  </div>
+  <div class="wrap foot-legal">
+    <span>Copyright &copy; <a href="https://www.JayHackPro.com"><strong>JayHackPro<span class="reg">®</span> Inc.</strong></a> <span id="year">2026</span>. All Rights Reserved.</span>
+    <span class="foot-design">Designed by <a href="https://www.JaydenYoonZK.com">Jayden Yoon ZK</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

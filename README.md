@@ -14,7 +14,7 @@ safely. Nothing is ever deleted without your say so.
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
 [![CI](https://github.com/JayHackPro/JayShield/actions/workflows/ci.yml/badge.svg)](https://github.com/JayHackPro/JayShield/actions)
 
-**by [JayHackPro](https://www.JayHackPro.com)**
+**[Website](https://jayhackpro.github.io/JayShield/)** · **[npm](https://www.npmjs.com/package/@jayhackpro/jayshield)** · by **[JayHackPro](https://www.JayHackPro.com)**
 
 </div>
 
