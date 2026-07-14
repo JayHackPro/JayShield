@@ -162,7 +162,7 @@ html { scrollbar-color: #46f08a #080d0a; scrollbar-width: thin; }
 }
 .nav-bar { display: flex; align-items: center; justify-content: space-between; height: 62px; }
 .brand { display: flex; align-items: center; gap: 11px; color: var(--ink); font-family: var(--mono); }
-.brand-mark { filter: drop-shadow(0 0 8px var(--glow)); border-radius: 8px; flex: none; }
+.brand-mark { filter: drop-shadow(0 0 8px var(--glow)); flex: none; }
 .brand-name { font-weight: 700; letter-spacing: -0.01em; font-size: 1.02rem; }
 .brand-by { color: var(--ink-dim); font-weight: 400; }
 .nav-links { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 0.86rem; }
