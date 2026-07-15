@@ -68,12 +68,14 @@
     <text x="744" y="175" font-size="16" fill="#5f7167">jayshield</text>
   </g>
   <g font-size="17.5">
-    <text x="676" y="228"><tspan fill="#46f08a" font-weight="700">$</tspan><tspan fill="#cfdacf"> npx @jayhackpro/jayshield ./public_html</tspan></text>
-    <text x="676" y="270" fill="#66786c">Scanned 1,284 files (24.6 MB) in 0.9s</text>
-    <text x="676" y="324"><tspan fill="#ff5c5c" font-weight="700">CRITICAL</tspan><tspan x="812" fill="#e7eee8" font-weight="700">uploads/logo.php</tspan></text>
-    <text x="676" y="352"><tspan x="696" fill="#ff5c5c">✕</tspan><tspan fill="#9db0a2"> obfuscated eval of a decoded payload</tspan></text>
-    <text x="676" y="406"><tspan fill="#ff9d3c" font-weight="700">HIGH</tspan><tspan x="812" fill="#e7eee8" font-weight="700">index.html</tspan></text>
-    <text x="676" y="434"><tspan x="696" fill="#ff9d3c">▲</tspan><tspan fill="#9db0a2"> hidden zero-size iframe</tspan></text>
-    <text x="676" y="474"><tspan fill="#46f08a" font-weight="700">✔ 2 threats quarantined,</tspan><tspan fill="#66786c"> restore anytime</tspan></text>
+    <text x="676" y="220"><tspan fill="#46f08a" font-weight="700">$</tspan><tspan fill="#cfdacf"> npx @jayhackpro/jayshield ./public_html</tspan></text>
+    <text x="676" y="254" fill="#8effb6" font-weight="700">▓█ JayHackPro █▓</text>
+    <text x="676" y="282" fill="#46f08a" font-weight="700">JayShield® · find and remove web malware</text>
+    <text x="676" y="316" fill="#66786c">Scanned 1,284 files (24.6 MB) in 0.9s</text>
+    <text x="676" y="354"><tspan fill="#ff5c5c" font-weight="700">CRITICAL</tspan><tspan x="812" fill="#e7eee8" font-weight="700">uploads/logo.php</tspan></text>
+    <text x="676" y="380"><tspan x="696" fill="#ff5c5c">✕</tspan><tspan fill="#9db0a2"> obfuscated eval of a decoded payload</tspan></text>
+    <text x="676" y="416"><tspan fill="#ff9d3c" font-weight="700">HIGH</tspan><tspan x="812" fill="#e7eee8" font-weight="700">index.html</tspan></text>
+    <text x="676" y="442"><tspan x="696" fill="#ff9d3c">▲</tspan><tspan fill="#9db0a2"> hidden zero-size iframe</tspan></text>
+    <text x="676" y="476"><tspan fill="#46f08a" font-weight="700">✔ 2 threats quarantined,</tspan><tspan fill="#66786c"> restore anytime</tspan></text>
   </g>
 </svg>
