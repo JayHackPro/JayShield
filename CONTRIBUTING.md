@@ -36,8 +36,6 @@ the tests.
 
 - Zero runtime dependencies. A security tool should be small enough to read.
 - Plain, readable JavaScript with clear names.
-- No em dashes or en dashes in code, comments, or docs. The test suite enforces
-  this.
 - Every source file keeps the brand notice at the top.
 
 ## Reporting a security issue
