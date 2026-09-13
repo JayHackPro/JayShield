@@ -57,6 +57,39 @@ const UPLOAD_PATH = /(?:wp-content\/(?:uploads|cache)|\/uploads?\/|\/media\/|\/a
 const PHP_TAG = Buffer.from("<?php");
 const PHP_SHORT = Buffer.from("<?=");
 
+// WP Super Cache and similar plugins store cached pages as .php files that
+// open with a `<?php die(); ?>` guard and hold only HTML after it. The guard
+// runs nothing, so a file whose only PHP is that guard is not an executable
+// planted in the cache. Anything else in the file is still scanned as usual.
+const PHP_GUARD = /<\?php\s+(?:die|exit)\s*(?:\(\s*(?:['"][^'"]*['"])?\s*\))?\s*;?\s*\?>/g;
+const CODE_MARKER = /<\?php\b|<\?=|<%|#!/;
+
+/** True when the text carries a die/exit guard and no other code marker. */
+export function onlyGuardPhp(text) {
+  const stripped = text.replace(PHP_GUARD, "");
+  return stripped.length !== text.length && !CODE_MARKER.test(stripped);
+}
+
+// Shape alone is not evidence. A packed payload has to unpack and run itself,
+// so the shape heuristics below also require one of these: a decoder, an
+// execution primitive, or request input. An SVG icon on one long line, a
+// lookup table full of escapes, or an embedded WebAssembly module has none.
+const SERVER_PRIMITIVE = /\b(?:eval|assert|base64_decode|gzinflate|gzuncompress|gzdecode|str_rot13|create_function|preg_replace|system|passthru|shell_exec|exec|popen|proc_open)\s*\(|\$_(?:GET|POST|REQUEST|COOKIE)\b|\$\w+\s*\(\s*\$/i;
+const BROWSER_SINK = /\beval\s*\(|\bFunction\s*\(|document\.write\s*\(|\.innerHTML\s*=|createElement\s*\(\s*['"]script|location(?:\.href|\.replace)?\s*[=(]|\.src\s*=/;
+
+/** Every line at or over the length cap, so a check can look inside them. */
+function longLines(text, min) {
+  const out = [];
+  let start = 0;
+  for (let i = 0; i <= text.length; i++) {
+    if (i === text.length || text.charCodeAt(i) === 10) {
+      if (i - start >= min) out.push(text.slice(start, i));
+      start = i + 1;
+    }
+  }
+  return out;
+}
+
 /** Byte offset of the first PHP open tag anywhere in a buffer, or -1. */
 function phpTagOffset(buffer) {
   const a = buffer.indexOf(PHP_TAG);
@@ -126,8 +159,9 @@ export function runHeuristics(file) {
   const findings = [];
   const posix = file.path.toLowerCase().replace(/\\/g, "/");
 
-  // An executable script sitting in an uploads or media folder.
-  if (EXECUTABLE_KINDS.has(file.kind) && UPLOAD_PATH.test(posix)) {
+  // An executable script sitting in an uploads or media folder. A cache page
+  // whose only PHP is the die() guard is left alone, see onlyGuardPhp.
+  if (EXECUTABLE_KINDS.has(file.kind) && UPLOAD_PATH.test(posix) && !onlyGuardPhp(file.text)) {
     findings.push(mk(
       "heuristic.exec_in_uploads",
       "Executable script in an uploads folder",
@@ -140,10 +174,11 @@ export function runHeuristics(file) {
   }
 
   // Very high entropy in a text-based source file means packed or encrypted
-  // content, which legitimate source rarely is.
+  // content. Legitimate source rarely has it, but data tables do, so the file
+  // must also hold something that could unpack or run the payload.
   if (file.kind === "php" || file.kind === "asp" || file.kind === "perl") {
     const entropy = shannonEntropy(file.buffer);
-    if (entropy >= 5.6 && file.buffer.length >= 512) {
+    if (entropy >= 5.6 && file.buffer.length >= 512 && SERVER_PRIMITIVE.test(file.text)) {
       findings.push(mk(
         "heuristic.high_entropy",
         "Packed or encrypted server script",
@@ -156,24 +191,33 @@ export function runHeuristics(file) {
     }
   }
 
-  // A single enormous line in a server script is almost always a minified
-  // one-line payload rather than hand-written code.
+  // A single enormous line in a server script that also decodes or runs
+  // something is the shape of a one-line payload. A long line of SVG markup
+  // or a big array literal is just a long line.
   if ((file.kind === "php" || file.kind === "asp") && longestLine(file.text) >= 2000) {
-    findings.push(mk(
-      "heuristic.long_line",
-      "Very long single line in a server script",
-      "medium",
-      "obfuscation",
-      file.text,
-      /.{2000,}/,
-      "One line thousands of characters long is the shape of a compressed, hidden payload."
-    ));
+    const payloadLine = longLines(file.text, 2000).find((line) => SERVER_PRIMITIVE.test(line));
+    if (payloadLine) {
+      findings.push(mk(
+        "heuristic.long_line",
+        "Very long single line that decodes or runs code",
+        "medium",
+        "obfuscation",
+        file.text,
+        /.{2000,}/,
+        "One line thousands of characters long, with a decoder or an execution call on it, is the shape of a compressed, hidden payload."
+      ));
+    }
   }
 
-  // A large base64 blob assigned to a variable, then handed to a decoder, is
-  // the loader half of most packed shells.
+  // A large base64 blob paired with a decoder is the loader half of most
+  // packed shells. In the browser the decoded text must also reach something
+  // that runs it; an embedded WebAssembly module or font decoded with atob
+  // does not.
   const blob = /['"][A-Za-z0-9+/]{200,}={0,2}['"]/;
-  if ((file.kind === "php" || file.kind === "js") && blob.test(file.text) && /(?:base64_decode|atob|gzinflate|gzuncompress)/.test(file.text)) {
+  const decoderNearby = file.kind === "js"
+    ? /\batob\s*\(/.test(file.text) && BROWSER_SINK.test(file.text)
+    : /(?:base64_decode|gzinflate|gzuncompress|gzdecode)\s*\(/.test(file.text);
+  if ((file.kind === "php" || file.kind === "js") && blob.test(file.text) && decoderNearby) {
     findings.push(mk(
       "heuristic.base64_blob",
       "Large encoded blob with a decoder nearby",

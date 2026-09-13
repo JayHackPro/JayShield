@@ -11,6 +11,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { scan } from "../src/scanner.js";
+import { DEFAULT_SKIP_DIRS } from "../src/walk.js";
 import { parseHashList } from "../src/hashes.js";
 import {
   quarantineFiles,
@@ -50,11 +51,17 @@ const BOOLEAN_FLAGS = new Set([
   "json", "follow-symlinks", "no-color", "verbose", "dry-run",
   "yes", "help", "version", "banner", "no-banner"
 ]);
-const VALUE_FLAGS = new Set(["min-severity", "ignore-rule", "hashes", "max-size", "vault"]);
+const VALUE_FLAGS = new Set(["min-severity", "ignore-rule", "hashes", "max-size", "vault", "include"]);
+const LIST_FLAGS = new Set(["ignore-rule", "include"]);
 const ALIASES = { h: "help", V: "version", v: "verbose", q: "quarantine", j: "json" };
 
+// A website address is not something JayShield can open. It reads files.
+const LOOKS_LIKE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
+const LOOKS_LIKE_HOST = /^(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/.*)?$/i;
+const GUIDE_URL = "https://github.com/JayHackPro/JayShield#scan-a-wordpress-site";
+
 function parseArgs(argv) {
-  const flags = { "ignore-rule": [] };
+  const flags = { "ignore-rule": [], include: [] };
   const positionals = [];
   let bad = null;
 
@@ -75,7 +82,7 @@ function parseArgs(argv) {
       if (VALUE_FLAGS.has(name)) {
         if (value === null) value = argv[++i];
         if (value === undefined) { bad = `--${name} needs a value`; break; }
-        if (name === "ignore-rule") flags["ignore-rule"].push(...value.split(",").map((s) => s.trim()).filter(Boolean));
+        if (LIST_FLAGS.has(name)) flags[name].push(...value.split(",").map((s) => s.trim()).filter(Boolean));
         else flags[name] = value;
       } else if (BOOLEAN_FLAGS.has(name)) {
         flags[name] = true;
@@ -107,8 +114,16 @@ function helpText(v) {
     jayshield file.php app/            scan several targets
     jayshield .                        scan the current folder
     jayshield . --min-severity high    show only high and critical
+    jayshield . --include vendor       also scan a folder skipped by name
     jayshield . --json > report.json   machine-readable output
     jayshield . --verbose              include rule ids and references
+
+  ${color.bold("Websites")}
+    JayShield reads files on disk. It does not connect to a URL.
+    To check a live site, run it on the server over SSH, or on a copy of
+    the site downloaded with SFTP or a backup. WordPress files that are
+    flagged are marked, with advice to replace rather than only remove.
+    ${color.dim(GUIDE_URL)}
 
   ${color.bold("Remove")}   ${color.dim("(safe: files are moved, never deleted)")}
     jayshield . --quarantine           move every threat into a local vault
@@ -124,6 +139,8 @@ function helpText(v) {
   ${color.bold("Options")}
     --min-severity <level>   critical | high | medium | low
     --ignore-rule <id,...>   silence one or more rules
+    --include <dir,...>      scan folders skipped by name, or "all"
+                             (skipped: ${[...DEFAULT_SKIP_DIRS].join(" ")})
     --hashes <file>          add known-bad sha256 hashes (one per line)
     --max-size <MB>          skip files larger than this (default 5)
     --vault <dir>            quarantine folder (default ${QUARANTINE_DIR})
@@ -148,6 +165,20 @@ function fail(message) {
   process.stderr.write(color.red("  error: ") + message + "\n");
   process.stderr.write(color.dim("  run  jayshield --help  for usage\n"));
   process.exitCode = 2;
+}
+
+/** Someone passed a website address. Say plainly what JayShield can do instead. */
+function failUrl(target) {
+  const host = target.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "").replace(/\/.*$/, "") || "example.com";
+  const lines = [
+    `JayShield scans files on disk. It cannot connect to ${target}.`,
+    "  To check that site, run JayShield where its files are:",
+    color.brand(`    on the server, over SSH      jayshield /var/www/${host}/public_html`),
+    color.brand(`    or on a downloaded copy      jayshield ~/Downloads/${host}`),
+    "  Get the files with SFTP, your host's file manager, or a full site backup.",
+    color.dim(`  Guide: ${GUIDE_URL}`)
+  ];
+  fail(lines.join("\n"));
 }
 
 async function main() {
@@ -191,15 +222,18 @@ async function main() {
 
   const targets = positionals.length ? positionals : ["."];
   for (const t of targets) {
+    if (LOOKS_LIKE_URL.test(t)) return failUrl(t);
     try {
       await fs.access(t);
     } catch {
+      if (LOOKS_LIKE_HOST.test(t)) return failUrl(t);
       return fail(`no such file or folder: ${t}`);
     }
   }
 
   const result = await scan(targets, {
     ignoreRules: new Set(flags["ignore-rule"]),
+    includeDirs: flags.include,
     extraHashes,
     maxBytes,
     minSeverity: flags["min-severity"],

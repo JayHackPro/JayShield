@@ -72,6 +72,36 @@ export function kindForPath(filePath) {
   }
 }
 
+/**
+ * The hex-escaped spelling of a word, either letter case per character, so
+ * "\x65\x76\x61\x6c" and "\x45\x56\x41\x4C" both read as eval. Legitimate code
+ * writes binary constants as hex escapes all the time; nobody spells a
+ * function name that way unless they want it unseen.
+ */
+function hexWord(word) {
+  return word
+    .split("")
+    .map((ch) => {
+      const lower = ch.toLowerCase().charCodeAt(0).toString(16).padStart(2, "0");
+      const upper = ch.toUpperCase().charCodeAt(0).toString(16).padStart(2, "0");
+      return lower === upper ? `\\\\x${lower}` : `\\\\x(?:${lower}|${upper})`;
+    })
+    .join("");
+}
+
+const HEX_HIDDEN_WORDS = [
+  "eval", "assert", "system", "passthru", "shell_exec", "exec", "popen", "proc_open",
+  "base64_decode", "gzinflate", "gzuncompress", "gzdecode", "str_rot13", "create_function",
+  "preg_replace", "file_put_contents", "fwrite", "move_uploaded_file",
+  "_GET", "_POST", "_REQUEST", "_COOKIE"
+];
+
+// A dangerous name spelled in hex, or a hex string literal called as a function.
+const HEX_HIDDEN = new RegExp(
+  HEX_HIDDEN_WORDS.map(hexWord).join("|") + `|["'](?:\\\\x[0-9a-f]{2}){3,}["']\\s*\\(`,
+  "i"
+);
+
 export const RULES = [
   // ----- PHP obfuscation: decode-then-run, the signature of almost every shell
   {
@@ -176,12 +206,12 @@ export const RULES = [
   },
   {
     id: "php.hex_obfuscation",
-    name: "Long hex-escaped string",
-    severity: "medium",
+    name: "Function name hidden in hex escapes",
+    severity: "high",
     category: "obfuscation",
     kinds: ["php", "js"],
-    pattern: /(?:\\x[0-9a-f]{2}){12,}/i,
-    description: "A long run of hex escapes is a common way to hide function names and payloads.",
+    pattern: HEX_HIDDEN,
+    description: "A dangerous function or request variable is spelled out as hex escapes so a reader does not see it. Binary constants written in hex are normal and are not flagged.",
     references: ["https://owasp.org/www-community/attacks/Web_Shell"]
   },
   {
@@ -242,8 +272,8 @@ export const RULES = [
     severity: "critical",
     category: "webshell",
     kinds: ["php", "other"],
-    pattern: /WSO(?:hex)?|wso_ex|\$default_charset\s*=.*['"]FilesMan['"]/i,
-    description: "Fingerprint of the WSO webshell, one of the most widely reused PHP shells.",
+    pattern: /\bWSO_VERSION\b|\bwso(?:Login|Logout|Header|Footer|SecParam|Ex|PrintTree|Action|Ajax)\s*\(|\$wso_ex\b|\bWSO\s+(?:shell|\d+\.\d+)|\$default_charset\s*=.*['"]FilesMan['"]/i,
+    description: "Fingerprint of the WSO webshell, one of the most widely reused PHP shells. Matches its own function and constant names, not the letters w-s-o inside another word.",
     references: ["https://owasp.org/www-community/attacks/Web_Shell"]
   },
   {
@@ -324,8 +354,14 @@ export const RULES = [
     severity: "high",
     category: "injection",
     kinds: ["html", "php", "js"],
-    pattern: /<iframe\b[^>]*(?:(?:width|height)\s*=\s*["']?\s*[01]\b|style\s*=\s*["'][^"']*(?:display\s*:\s*none|visibility\s*:\s*hidden|position\s*:\s*absolute[^"']*(?:top|left)\s*:\s*-?\d))/i,
-    description: "An invisible iframe usually delivers malware or ad fraud to visitors without a trace on the page.",
+    // A hidden iframe that points somewhere, so it must carry a src. Skipped:
+    // a tag with no src, an empty or javascript: frame (upload libraries use
+    // those as a scratch target), and the Google Tag Manager noscript snippet
+    // that sits in most theme headers.
+    // Attribute scans stop at the next tag and are bounded, so a page full of
+    // unterminated tags costs linear time rather than stalling the scan.
+    pattern: /<iframe\b(?=[^<>]{0,3000}\bsrc\s*=)(?![^<>]{0,3000}\bsrc\s*=\s*(?:["']?\s*(?:javascript:|about:blank)|["']\s*["']|["']?[^"'>\s]{0,300}googletagmanager\.com\/ns\.html))[^<>]{0,3000}(?:\b(?:width|height)\s*=\s*["']?\s*[01]\b|style\s*=\s*["'][^"'<>]{0,3000}(?:display\s*:\s*none|visibility\s*:\s*hidden|position\s*:\s*absolute[^"'<>]{0,3000}(?:top|left)\s*:\s*-?\d))/i,
+    description: "An invisible iframe that loads another address usually delivers malware or ad fraud to visitors without a trace on the page.",
     references: ["https://owasp.org/www-community/attacks/Content_Spoofing"]
   },
   {
@@ -378,7 +414,7 @@ export const RULES = [
     severity: "medium",
     category: "spam",
     kinds: ["html", "php"],
-    pattern: /<(?:div|span)\b[^>]*style\s*=\s*["'][^"']*(?:display\s*:\s*none|position\s*:\s*absolute[^"']*left\s*:\s*-\d{3,})[^"']*["'][^>]*>\s*(?:<a\b[^>]*>[^<]*<\/a>\s*){2,}/i,
+    pattern: /<(?:div|span)\b[^<>]{0,3000}style\s*=\s*["'][^"'<>]{0,3000}(?:display\s*:\s*none|position\s*:\s*absolute[^"'<>]{0,3000}left\s*:\s*-\d{3,})[^"'<>]{0,3000}["'][^<>]{0,3000}>\s*(?:<a\b[^<>]{0,3000}>[^<]{0,3000}<\/a>\s*){2,}/i,
     description: "A block of links hidden from visitors but read by search engines, the shape of injected spam.",
     references: ["https://developers.google.com/search/docs/essentials/spam-policies"]
   },

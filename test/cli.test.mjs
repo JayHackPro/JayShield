@@ -88,3 +88,65 @@ test("a missing target fails cleanly with exit 2", () => {
   assert.equal(r.status, 2);
   assert.match(r.stderr, /no such file or folder/);
 });
+
+test("a website address is refused with an explanation, not a confusing file error", () => {
+  for (const target of ["https://example.com", "http://example.com/wp-admin/", "example.com", "www.example.com/blog"]) {
+    const r = run([target]);
+    assert.equal(r.status, 2, target);
+    assert.match(r.stderr, /scans files on disk/, target);
+    assert.match(r.stderr, /cannot connect to/, target);
+    assert.match(r.stderr, /over SSH/, target);
+    assert.match(r.stderr, /downloaded copy/, target);
+    assert.doesNotMatch(r.stderr, /no such file or folder/, target);
+  }
+});
+
+test("--include scans a folder that is skipped by name", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "jayshield-cli-include-"));
+  try {
+    await fs.mkdir(path.join(dir, "vendor"));
+    await fs.writeFile(path.join(dir, "ok.php"), "<?php echo 1;");
+    await fs.writeFile(path.join(dir, "vendor", "bad.php"), "<?php eval(base64_decode($_POST['x']));");
+
+    const skipped = run([dir, "--json"]);
+    assert.equal(skipped.status, 0);
+    const a = JSON.parse(skipped.stdout);
+    assert.equal(a.summary.skippedDirs, 1);
+    assert.deepEqual(a.summary.skippedDirNames, ["vendor"]);
+
+    const included = run([dir, "--json", "--include", "vendor"]);
+    assert.equal(included.status, 1);
+    const b = JSON.parse(included.stdout);
+    assert.equal(b.summary.skippedDirs, 0);
+    assert.equal(b.summary.infected, 1);
+
+    const human = run([dir]);
+    assert.match(human.stdout, /Skipped 1 folder by name \(vendor\)/);
+    assert.match(human.stdout, /--include vendor/);
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("the report names WordPress files and says to replace them, in text and in JSON", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "jayshield-cli-wp-"));
+  try {
+    await fs.mkdir(path.join(dir, "wp-includes"));
+    await fs.writeFile(path.join(dir, "wp-settings.php"), "<?php // settings");
+    await fs.writeFile(path.join(dir, "wp-includes", "version.php"), "<?php $wp_version = '6.8.2';");
+    await fs.writeFile(path.join(dir, "wp-config.php"), "<?php eval(base64_decode($_POST['x']));");
+
+    const human = run([dir]);
+    assert.equal(human.status, 1);
+    assert.match(human.stdout, /WordPress 6\.8\.2 at /);
+    assert.match(human.stdout, /\[wordpress config\]/);
+    assert.match(human.stdout, /part of WordPress itself/);
+    assert.match(human.stdout, /takes the site offline/);
+
+    const json = JSON.parse(run([dir, "--json"]).stdout);
+    assert.equal(json.sites[0].version, "6.8.2");
+    assert.equal(json.infected[0].site.role, "config");
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});

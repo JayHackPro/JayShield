@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { scanBuffer } from "../src/scanner.js";
-import { shannonEntropy, longestLine } from "../src/heuristics.js";
+import { shannonEntropy, longestLine, onlyGuardPhp } from "../src/heuristics.js";
 
 const idsFor = (p, content) => scanBuffer(p, Buffer.from(content)).map((f) => f.id);
 
@@ -43,6 +43,19 @@ test("flags an executable script inside a web uploads folder", () => {
   assert.ok(ids.includes("heuristic.exec_in_uploads"));
 });
 
+test("a cached page whose only PHP is the die() guard is not an executable in the cache", () => {
+  const guard = "<?php die(); ?>\n<!DOCTYPE html><html><body>cached</body></html>\n";
+  assert.equal(onlyGuardPhp(guard), true);
+  assert.equal(onlyGuardPhp("<?php exit; ?>\n<html></html>"), true);
+  assert.equal(onlyGuardPhp("<html>no php at all</html>"), false);
+  assert.equal(onlyGuardPhp("<?php die(); ?>\n<?php system($_GET['c']); ?>"), false);
+  assert.deepEqual(idsFor("/var/www/site/wp-content/cache/supercache/wp-cache-1.php", guard), []);
+  // The guard does not hide a payload that follows it.
+  const ids = idsFor("/var/www/site/wp-content/cache/supercache/wp-cache-2.php", "<?php die(); ?>\n<?php system($_GET['c']); ?>");
+  assert.ok(ids.includes("heuristic.exec_in_uploads"));
+  assert.ok(ids.includes("php.exec_user_input"));
+});
+
 test("does NOT flag a normal script just because a system ancestor is named tmp or cache", () => {
   // Regression: earlier the heuristic walked every ancestor up to root, so a
   // file under /private/tmp or /var/cache was wrongly called an upload.
@@ -51,9 +64,43 @@ test("does NOT flag a normal script just because a system ancestor is named tmp 
 });
 
 test("flags packed or one-line payloads by shape", () => {
-  const packed = "<?php $x='" + "A".repeat(2600) + "'; // one very long line";
+  const packed = "<?php eval(gzinflate(base64_decode('" + "A".repeat(2600) + "')));";
   assert.ok(idsFor("packed.php", packed).includes("heuristic.long_line"));
 
   const blob = "<?php $data = '" + "QUJD".repeat(80) + "'; echo base64_decode($data);";
   assert.ok(idsFor("loader.php", blob).includes("heuristic.base64_blob"));
+
+  const browser = "var p='" + "QUJD".repeat(80) + "'; document.write(atob(p));";
+  assert.ok(idsFor("loader.js", browser).includes("heuristic.base64_blob"));
+});
+
+test("shape alone is not a finding: long data lines, hex tables, and embedded wasm are left alone", () => {
+  // Real WordPress core shapes that used to be flagged.
+  const svgLine = "<?php return array( 'icon' => '<svg " + "d=\"M0 0h24v24H0z\" ".repeat(150) + "' );";
+  assert.deepEqual(idsFor("wp-includes/blocks/social-link.php", svgLine), []);
+
+  const entityTable = "<?php\n" + "$t = array(\n" + Array.from({ length: 400 }, (_, i) => `  '&#x${(0x1f300 + i).toString(16)};&#x200d;&#xfe0f;' => ${i},`).join("\n") + "\n);";
+  assert.deepEqual(idsFor("wp-includes/formatting.php", entityTable), []);
+
+  const wasm = "const bytes = atob('" + "AGFzbQEAAAAB".repeat(40) + "'); WebAssembly.instantiate(Uint8Array.from(bytes, c => c.charCodeAt(0)));";
+  assert.deepEqual(idsFor("router/index.js", wasm), []);
+
+  // High entropy with no way to unpack or run anything is data, not a payload.
+  const noise = "<?php\n$table = \"" + Array.from({ length: 4000 }, (_, i) => "\\x" + ((i * 7919) % 256).toString(16).padStart(2, "0")).join("") + "\";";
+  assert.ok(!idsFor("table.php", noise).includes("heuristic.high_entropy"));
+  assert.ok(!idsFor("table.php", noise).includes("php.hex_obfuscation"));
+
+  // A dense payload with a decoder next to it is still flagged. The bytes are
+  // pseudo-random so the base64 text is close to the entropy of a real packer.
+  let seed = 12345;
+  const bytes = Buffer.alloc(6000);
+  for (let i = 0; i < bytes.length; i++) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    bytes[i] = (seed >>> 16) & 0xff;
+  }
+  const packed = "<?php eval(gzinflate(base64_decode('" + bytes.toString("base64") + "')));";
+  assert.ok(idsFor("packed.php", packed).includes("heuristic.high_entropy"));
+  // The same dense blob with nothing to unpack it is left alone.
+  const data = "<?php $blob = '" + bytes.toString("base64") + "';";
+  assert.ok(!idsFor("data.php", data).includes("heuristic.high_entropy"));
 });

@@ -8,6 +8,7 @@
 
 import { color, severityColor } from "./colors.js";
 import { worstSeverity } from "./scanner.js";
+import { countSiteRoles, SITE_ROLES } from "./site.js";
 
 const GLYPH = {
   critical: "✕", // x
@@ -69,11 +70,21 @@ export function formatHuman(result, opts = {}) {
     if (result.stats.unreadable) notes.push(`${result.stats.unreadable} unreadable`);
     out.push("  " + color.dim(notes.join(", ")));
   }
+  for (const site of result.sites || []) {
+    const v = site.version ? `WordPress ${site.version}` : "WordPress (version not read)";
+    out.push("  " + color.dim(`${v} at ${site.root}`));
+  }
+  if (result.stats.skippedDirs) {
+    const names = (result.skippedDirNames || []).join(", ");
+    const plural = result.stats.skippedDirs === 1 ? "folder" : "folders";
+    const include = (result.skippedDirNames || []).join(",") || "all";
+    out.push("  " + color.dim(`Skipped ${result.stats.skippedDirs} ${plural} by name (${names}). Scan them too with --include ${include}`));
+  }
   out.push("");
 
   if (!result.infected.length) {
     out.push("  " + color.green(color.bold("✔ No malware found.")));
-    out.push("  " + color.dim("Every file scanned came back clean."));
+    out.push("  " + color.dim("Nothing in the files scanned matched a known technique, heuristic, or bad hash."));
     out.push("");
     return out.join("\n");
   }
@@ -82,7 +93,8 @@ export function formatHuman(result, opts = {}) {
     const worst = record.findings[0].severity;
     const paint = severityColor(worst);
     const verb = opts.quarantined ? color.dim(" (quarantined)") : "";
-    out.push("  " + paint(color.bold(worst.toUpperCase().padEnd(9))) + color.bold(record.path) + verb);
+    const site = record.site ? color.dim(` [wordpress ${record.site.role}]`) : "";
+    out.push("  " + paint(color.bold(worst.toUpperCase().padEnd(9))) + color.bold(record.path) + site + verb);
 
     for (const f of record.findings) {
       const g = severityColor(f.severity)(GLYPH[f.severity] || "•");
@@ -117,14 +129,33 @@ export function formatHuman(result, opts = {}) {
   );
   out.push("");
 
+  const roles = countSiteRoles(result.infected);
+  const siteFiles = Object.values(roles).reduce((a, b) => a + b, 0);
+  if (siteFiles) {
+    const breakdown = SITE_ROLES.filter((r) => roles[r]).map((r) => `${roles[r]} ${r}`).join(", ");
+    out.push("  " + color.yellow(color.bold(`${siteFiles} flagged file${siteFiles === 1 ? " is" : "s are"} part of WordPress itself`)) + color.dim(` (${breakdown})`));
+    out.push("  " + color.dim("Injected code inside a real file means the whole file is untrusted. Replace these with"));
+    out.push("  " + color.dim("clean copies of the same version rather than only removing them:"));
+    for (const role of SITE_ROLES) {
+      if (!roles[role]) continue;
+      const advice = result.infected.find((r) => r.site && r.site.role === role).site.advice;
+      out.push("  " + color.dim(`  ${role}: `) + color.gray(advice));
+    }
+    out.push("");
+  }
+
   if (!opts.quarantined) {
     out.push("  " + color.dim("Review the findings, then remove them safely with:"));
     out.push("  " + color.brand(`    jayshield ${quoteTargets(result.targets)} --quarantine`));
     out.push("  " + color.dim("Quarantine moves files into a local vault. Put them back any time with --restore."));
+    if (siteFiles) out.push("  " + color.dim("Quarantining the WordPress files above takes the site offline until you replace them."));
     out.push("");
   } else {
     out.push("  " + color.dim("Files above were moved into the quarantine vault. Restore any of them with:"));
     out.push("  " + color.brand("    jayshield --restore"));
+    if (siteFiles) {
+      out.push("  " + color.yellow("WordPress files were moved too. If the site is offline now, restore them, then replace them with clean copies."));
+    }
     out.push("");
   }
 
@@ -147,12 +178,15 @@ export function toJson(result, extra = {}) {
       startedAt: result.startedAt,
       durationMs: result.durationMs,
       targets: result.targets,
+      sites: result.sites || [],
       summary: {
         scanned: result.stats.scanned,
         clean: result.stats.clean,
         infected: result.infected.length,
         skippedLarge: result.stats.skippedLarge,
         unreadable: result.stats.unreadable,
+        skippedDirs: result.stats.skippedDirs || 0,
+        skippedDirNames: result.skippedDirNames || [],
         worstSeverity: worstSeverity(result),
         bySeverity: result.countsBySeverity,
         byCategory: result.countsByCategory
@@ -160,6 +194,7 @@ export function toJson(result, extra = {}) {
       infected: result.infected.map((r) => ({
         path: r.path,
         size: r.size,
+        site: r.site ? { type: r.site.type, role: r.site.role, root: r.site.root } : null,
         findings: r.findings.map((f) => ({
           rule: f.id,
           name: f.name,

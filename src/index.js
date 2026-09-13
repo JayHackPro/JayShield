@@ -15,6 +15,14 @@
  */
 
 export { scan, scanBuffer, worstSeverity, SEVERITY_RANK } from "./scanner.js";
+export { walk, DEFAULT_SKIP_DIRS, skipDirsWithout } from "./walk.js";
+export {
+  findWordPressRoots,
+  classifySiteFile,
+  readWordPressVersion,
+  countSiteRoles,
+  SITE_ROLES
+} from "./site.js";
 export { RULES, rulesForKind, kindForPath } from "./rules.js";
 export { runHeuristics, shannonEntropy } from "./heuristics.js";
 export { KNOWN_BAD, sha256, matchHash, parseHashList } from "./hashes.js";

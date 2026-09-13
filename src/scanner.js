@@ -7,10 +7,11 @@
  */
 
 import { promises as fs } from "node:fs";
-import { walk, DEFAULT_SKIP_DIRS } from "./walk.js";
+import { walk, DEFAULT_SKIP_DIRS, skipDirsWithout } from "./walk.js";
 import { rulesForKind, globalize, kindForPath } from "./rules.js";
 import { runHeuristics, runByteHeuristics, evidenceAt } from "./heuristics.js";
 import { matchHash } from "./hashes.js";
+import { findWordPressRoots, noteWordPressRoot, classifySiteFile, readWordPressVersion } from "./site.js";
 
 export const SEVERITY_RANK = { critical: 4, high: 3, medium: 2, low: 1 };
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -106,7 +107,8 @@ export function scanBuffer(filePath, buffer, options = {}) {
  * @param {number} [options.maxBytes]        skip files larger than this
  * @param {Set<string>} [options.ignoreRules]
  * @param {Map} [options.extraHashes]
- * @param {Set<string>} [options.skipDirs]
+ * @param {Set<string>} [options.skipDirs]     directory names to skip (default DEFAULT_SKIP_DIRS)
+ * @param {Iterable<string>} [options.includeDirs]  default-skipped names to scan anyway, or "all"
  * @param {boolean} [options.followSymlinks]
  * @param {string} [options.minSeverity]     drop findings below this level
  * @param {(info:{path:string,findings:Array}) => void} [options.onFile]
@@ -115,21 +117,35 @@ export function scanBuffer(filePath, buffer, options = {}) {
 export async function scan(targets, options = {}) {
   const maxBytes = options.maxBytes || DEFAULT_MAX_BYTES;
   const minRank = SEVERITY_RANK[options.minSeverity] || 0;
-  const skipDirs = options.skipDirs || DEFAULT_SKIP_DIRS;
+  const skipDirs = options.skipDirs || (options.includeDirs ? skipDirsWithout(options.includeDirs) : DEFAULT_SKIP_DIRS);
 
   const started = Date.now();
   const result = {
     targets,
     infected: [],
-    stats: { scanned: 0, skippedLarge: 0, unreadable: 0, bytes: 0, clean: 0 },
+    stats: { scanned: 0, skippedLarge: 0, unreadable: 0, bytes: 0, clean: 0, skippedDirs: 0 },
+    skippedDirNames: [],
+    sites: [],
     countsBySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
     countsByCategory: {},
     startedAt: new Date(started).toISOString(),
     durationMs: 0
   };
 
+  const skippedNames = new Set();
+  const onSkip = (name) => {
+    result.stats.skippedDirs++;
+    skippedNames.add(name);
+  };
+
+  // Which WordPress installs do these targets belong to? Checked up front so
+  // a scan of only wp-content still knows its site, and extended during the
+  // walk when a wp-settings.php turns up deeper in the tree.
+  const wpRoots = new Set(await findWordPressRoots(targets));
+
   for (const target of targets) {
-    for await (const entry of walk(target, { skipDirs, followSymlinks: options.followSymlinks })) {
+    for await (const entry of walk(target, { skipDirs, followSymlinks: options.followSymlinks, onSkip })) {
+      noteWordPressRoot(entry.path, wpRoots);
       if (entry.size > maxBytes) {
         result.stats.skippedLarge++;
         continue;
@@ -164,6 +180,18 @@ export async function scan(targets, options = {}) {
   result.infected.sort(
     (a, b) => topRank(b.findings) - topRank(a.findings) || a.path.localeCompare(b.path)
   );
+
+  // Which flagged files are the site's own code. The report gives these
+  // different advice: replace with a clean copy rather than only remove.
+  for (const record of result.infected) {
+    const site = classifySiteFile(record.path, wpRoots);
+    if (site) record.site = site;
+  }
+  for (const root of [...wpRoots].sort()) {
+    result.sites.push({ type: "wordpress", root, version: await readWordPressVersion(root) });
+  }
+
+  result.skippedDirNames = [...skippedNames].sort();
   result.durationMs = Date.now() - started;
   return result;
 }

@@ -11,8 +11,12 @@ import path from "node:path";
 
 /**
  * Directory names that are noise for a malware scan. They are skipped by
- * default so a scan of a real project stays fast and readable. The user
- * can still force them back in with --include.
+ * default so a scan of a real project stays fast and readable. The scan
+ * report says which of them were skipped, and --include puts them back.
+ *
+ * A plain "cache" folder is NOT on this list on purpose. On a WordPress site
+ * wp-content/cache is web-served, often writable, and a common place to plant
+ * a shell, so skipping it would turn a real infection into a clean report.
  */
 export const DEFAULT_SKIP_DIRS = new Set([
   ".git",
@@ -21,9 +25,15 @@ export const DEFAULT_SKIP_DIRS = new Set([
   "node_modules",
   "vendor",
   ".jayshield-quarantine",
-  ".cache",
-  "cache"
+  ".cache"
 ]);
+
+/** The skip set minus the names the user asked to include. "all" includes everything. */
+export function skipDirsWithout(include) {
+  const wanted = new Set(include || []);
+  if (wanted.has("all")) return new Set();
+  return new Set([...DEFAULT_SKIP_DIRS].filter((name) => !wanted.has(name)));
+}
 
 /**
  * Walk a starting path and yield every file underneath it, one at a time,
@@ -36,11 +46,13 @@ export const DEFAULT_SKIP_DIRS = new Set([
  * @param {Set<string>} [options.skipDirs]  directory names to skip
  * @param {boolean} [options.followSymlinks=false]
  * @param {(dir: string) => boolean} [options.enterDir]  return false to skip a directory
+ * @param {(name: string, dir: string) => void} [options.onSkip]  called for every directory skipped by name
  */
 export async function* walk(root, options = {}) {
   const skipDirs = options.skipDirs || DEFAULT_SKIP_DIRS;
   const followSymlinks = Boolean(options.followSymlinks);
   const enterDir = options.enterDir;
+  const onSkip = typeof options.onSkip === "function" ? options.onSkip : null;
 
   const stat = await fs.lstat(root);
   if (stat.isFile()) {
@@ -79,7 +91,10 @@ export async function* walk(root, options = {}) {
       }
 
       if (dirent.isDirectory()) {
-        if (skipDirs.has(entry.name)) continue;
+        if (skipDirs.has(entry.name)) {
+          if (onSkip) onSkip(entry.name, full);
+          continue;
+        }
         if (enterDir && !enterDir(full)) continue;
         stack.push(full);
       } else if (dirent.isFile()) {
