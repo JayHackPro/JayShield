@@ -3,6 +3,70 @@
 All notable changes to JayShield are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.3.0 - 2026-09-14
+
+A release about being usable on a real site, and honest about what a scan
+means.
+
+### Added
+
+- WordPress awareness. A scan recognises a WordPress install and prints its
+  version, and every flagged file that belongs to WordPress itself is tagged
+  `config`, `core`, `theme`, or `plugin` in the report and in `--json`. Those
+  files carry different advice: replace them with a clean copy of the same
+  version rather than only removing them, because quarantining one takes the
+  site or the theme offline. Scanning only `wp-content` still knows its site.
+- `--include <dir,...>` scans folders that are skipped by name, and
+  `--include all` scans everything. The report now says how many folders were
+  skipped and which names, so a clean result is never quieter than it should
+  be. Skipped names are also listed in `--help`.
+- A clear answer when given a website address. `jayshield https://example.com`
+  used to fail with "no such file or folder"; it now explains that JayShield
+  reads files on disk and shows the two ways to scan that site, over SSH or on
+  a downloaded copy.
+- README: a Requirements section, a step-by-step guide to scanning a WordPress
+  site on any hosting, an after-the-scan checklist for the things a file
+  scanner cannot do, and a plain list of what JayShield can and cannot promise.
+- `scan()` accepts `includeDirs` and returns `sites`, `skippedDirNames`, and
+  `stats.skippedDirs`; each infected record may carry `site`. The site helpers
+  and the walker are exported from the package.
+
+### Changed
+
+- Folders named `cache` are now scanned. On WordPress, `wp-content/cache` is
+  web-served, writable, and a common place to plant a shell, and the upload
+  heuristic already treated it as one, so skipping it left a blind spot.
+- The upload heuristic no longer flags a cached page whose only PHP is the
+  `<?php die(); ?>` guard that WP Super Cache writes. A payload after the
+  guard is still caught.
+- The clean-scan line now reads "Nothing in the files scanned matched a known
+  technique, heuristic, or bad hash", which is what a clean result means.
+
+### Fixed
+
+- A pristine WordPress 7.1 download was reported as 26 infected files, five
+  of them critical. Every one was a false positive, and every one is fixed:
+  - The WSO webshell rule matched the letters w-s-o inside any word, so
+    "Dawson", "WSODs", `useNewSodiumAPI`, and a certificate bundle were all
+    called a webshell. It now matches WSO's own function and constant names.
+  - The hex-escape rule flagged every long binary constant, in sodium_compat,
+    getID3, and SimplePie. It now flags a dangerous function name or request
+    variable spelled in hex, or a hex string literal called as a function,
+    and is high severity because that is never innocent.
+  - The hidden iframe rule matched `marginwidth="0"`, a hidden scratch frame
+    with a `javascript:` source, and the Google Tag Manager noscript snippet
+    that sits in most theme headers. It now requires a hidden frame with a
+    real destination, and a page full of unterminated tags can no longer
+    stall a scan.
+  - The long-line, high-entropy, and base64-blob heuristics fired on SVG
+    icons, entity tables, arrays of class names, and an embedded WebAssembly
+    module. Each now also requires a decoder, an execution call, or request
+    input on the same file or line, which a packed payload cannot do without.
+- Verified clean with the new rules against WordPress 7.1 with and without
+  `--include vendor`, WooCommerce 11.1.0, the Astra theme 4.13.11, jQuery
+  3.7.1, and Laravel 12.x, while every planted threat in the test fixtures is
+  still found.
+
 ## 1.2.1 - 2026-07-13
 
 ### Changed
