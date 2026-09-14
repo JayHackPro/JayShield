@@ -193,7 +193,7 @@
     const lines = [
       { d: 350, html: "" },
       { d: 260, html: '<span class="t-banner"><span class="t-ascii">' + ASCII + '</span><span class="t-compact">  ▓█ JayHackPro █▓</span></span>' },
-      { d: 140, html: '<span class="t-sub">  JayShield®  ·  find and remove web malware</span><span class="t-dim">   v1.3.0</span>' },
+      { d: 140, html: '<span class="t-sub">  JayShield®  ·  find and remove web malware</span><span class="t-dim">   v1.3.1</span>' },
       { d: 100, html: '<span class="t-dim">  github.com/JayHackPro/JayShield</span>' },
       { d: 200, html: "" },
       { d: 420, html: '<span class="t-dim">  Scanned 1,284 files (24.6 MB) in 0.9s</span>' },

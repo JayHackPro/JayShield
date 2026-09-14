@@ -3,7 +3,7 @@
 All notable changes to JayShield are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 1.3.0 - 2026-09-14
+## 1.3.1 - 2026-09-14
 
 A release about being usable on a real site, and honest about what a scan
 means.
@@ -66,6 +66,11 @@ means.
   `--include vendor`, WooCommerce 11.1.0, the Astra theme 4.13.11, jQuery
   3.7.1, and Laravel 12.x, while every planted threat in the test fixtures is
   still found.
+
+## 1.3.0 - 2026-09-14
+
+Not on npm. The registry reserved this number during an interrupted publish
+and will not release it, so the same code shipped as 1.3.1.
 
 ## 1.2.1 - 2026-07-13
 

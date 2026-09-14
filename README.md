@@ -338,7 +338,7 @@ demand, read in full, and script.
   have checked.
 
 **How it is checked.** Before a release the rules are run over real, clean
-code and must report nothing. For 1.3.0 (September 2026) that corpus was
+code and must report nothing. For 1.3.1 (September 2026) that corpus was
 WordPress 7.1 with and without `--include vendor`, WooCommerce 11.1.0, the
 Astra theme 4.13.11, jQuery 3.7.1, and Laravel 12.x, over twelve thousand files
 in all, with zero findings. The same run must still catch every planted threat
